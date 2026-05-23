@@ -2,7 +2,7 @@ import {
     SlashCommandBuilder
 } from "discord.js";
 
-import { PermissionLevel } from "../../core/permissionLevels.js";
+import { PermissionLevel } from "../../../core/permissionLevels.js";
 
 export default {
 
@@ -38,7 +38,7 @@ export default {
         const category = interaction.options.getString("category");
         const command = interaction.options.getString("command");
 
-        const { handleHelpCommand } = await import("../../core/helpHandler.js");
+        const { handleHelpCommand } = await import("../../../core/helpHandler.js");
 
         return handleHelpCommand(interaction, client, {
             category,

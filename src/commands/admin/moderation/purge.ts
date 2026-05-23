@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { PermissionLevel } from "../../core/permissionLevels.js";
+import { PermissionLevel } from "../../../core/permissionLevels.js";
 
 export default {
 
