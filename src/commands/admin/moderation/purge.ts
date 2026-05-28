@@ -1,51 +1,62 @@
-import { SlashCommandBuilder } from "discord.js";
-import { PermissionLevel } from "../../../core/permissionLevels.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
-export default {
+import { PermissionLevel } from "../../../core/guards/guards.js";
+import { Command } from "../../../core/commands/command.js";
+import { media } from "../../../utils/media.js";
+import { Colors } from "../../../config/theme.js";
+
+const command: Command = {
+
+    prefix: {
+        enabled: true
+    },
 
     aliases: [],
     requiredLevel: PermissionLevel.MOD,
+
     help: {
-        usage: "`/purge` **`<amount>`**",
+        usage: "`/purge` **`[amt]`**",
         example: `
             \`/purge\` **\`amount:\`** 50
         `.trim()
     },
 
+    // COMMAND DATA
     data: new SlashCommandBuilder()
-        .setName("purge")
-        .setDescription("Delete messages")
-        .addIntegerOption(option =>
-            option
-                .setName("amount")
-                .setDescription("1-100")
-                .setRequired(true)
-        )
-        
+    .setName('purge')
+    .setDescription('Delete specified amount of messages.')
+    .addIntegerOption(o =>
+        o
+        .setName('amount')
+        .setDescription('1-100')
+        .setRequired(true)
+    )
+
     ,
 
-    async execute(interaction: any) {
+    async execute(ctx) {
+        
+        // GATHER DATA
+        const amount = ctx.getNumber("amount")!;
 
-        const amount =
-            interaction.options.getInteger("amount");
-
+        // LOGIC
         if (amount < 1 || amount > 100) {
-            return interaction.reply({
-                content: "Choose 1-100",
+            return ctx.reply({
+                content: 'Choose 1-100',
                 flags: 64
             });
         }
 
-        const messages =
-            await interaction.channel.bulkDelete(
-                amount,
-                true
-            );
+        const messages = await ctx.channel.delete(amount);
 
-        await interaction.reply({
-            content:
-                `Deleted ${messages.size} messages.`,
-            flags: 64
+        // BUILD REPLY
+        await ctx.reply({
+            content: `Deleted ${messages.size} messages.`,
+            flags: MessageFlags.Ephemeral
         });
-    }
+
+    },
+
 };
+
+export default command;

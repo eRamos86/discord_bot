@@ -1,13 +1,19 @@
-import {
-    SlashCommandBuilder
-} from "discord.js";
+import * as Discord from 'discord.js'
 
-import { PermissionLevel } from "../../core/permissionLevels.js";
+import { PermissionLevel } from "./src/core/guards/permissionLevels.js";
+import { Command } from "./src/core/commands/command.js";
+import { media } from "./src/ui/embeds/media.js";
+import { Colors } from "./src/config/theme.js";
 
-export default{
+const command: Command = {
+
+    prefix: {
+        enabled: true
+    },
 
     aliases: [],
-    requiredLevel: PermissionLevel.LEVEL, //PUBLIC, MOD, ADMIN, OWNER
+    requiredLevel: PermissionLevel.PUBLIC,
+
     help: {
         usage: "`/command` **`<required>`** *`[optional]`*",
         example: `
@@ -17,10 +23,10 @@ export default{
         `.trim()
     },
 
-    data: new SlashCommandBuilder()
-        .setName("name")
-        .setDescription("description")
-
+    data: new Discord.SlashCommandBuilder()
+        .setName('name')
+        .setDescription('description')
+        
         /*
         
         optional:
@@ -40,16 +46,89 @@ export default{
         )
         
         */
-
-
         
-    , // dont forget the comma at the end here
-    
-    async execute(interaction: any) {
-        
-        //command logic here:
+        ,
 
+    async execute(ctx) {
+        
+        // GATHER DATA
+        
+        // LOGIC
+
+        // BUILD REPLY
 
     }
-
 };
+
+export default command;
+
+
+/*
+let embed, payload;
+        
+try {
+
+    embed = createEmbed({
+        title: ``,
+        desc: `
+
+        `.trim(),
+        footer: ``
+    });
+
+    console.log(`Embed created for command '${this.data.name}'`);
+
+} catch (err) {
+
+    console.error(err);
+
+    return await interaction.reply({
+        content:
+            `Error creating embed for '${this.data.name}':\n` +
+            `\n\n\n${err}\n\n\n`,
+        flags: 64
+    });
+    
+}
+
+try {
+
+    payload = createEmbedPayload({
+        embed,
+        client: interaction.client,
+        interaction,
+
+        thumbnail: {
+            type: ``
+        },
+        footerIcon: {
+            type: ``
+        },
+
+        /*
+        image: {
+            type: ``
+        },
+        /\/\/\
+
+    });
+
+    console.log(`Payload created for command '${this.data.name}'`);
+
+} catch (err) {
+
+    console.error(err);
+
+    return await interaction.reply({
+        content:
+            `Error creating payload for '${this.data.name}':\n` +
+            `\n\n\n${err}\n\n\n`,
+        flags: 64
+    });
+
+}
+
+await interaction.reply({
+    ...payload,
+});
+*/

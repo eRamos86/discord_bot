@@ -315,7 +315,19 @@ testing and system upkeep tools
 
 # Order
 
-- /serverinfo
+
+
+
+- ADD CACHING FOR HELP COMMAND
+
+- create command router system
+
+
+--add redeploy or deploy or reload command
+
+
+- /serverinfo [current]
+
 - /purge
 - /ban
 - /kick
