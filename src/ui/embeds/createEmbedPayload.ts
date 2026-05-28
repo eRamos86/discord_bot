@@ -101,12 +101,14 @@ export function createEmbedPayload(
             message
         });
 
+        /*
         const footer = embed.data.footer;
 
         embed.setFooter({
             text: `${Constants.BASE_FOOTER} ${footer?.text}` || Constants.BASE_FOOTER,
             iconURL: resolved.url
         });
+        */
 
         if (resolved.attachment) files.push(resolved.attachment);
 

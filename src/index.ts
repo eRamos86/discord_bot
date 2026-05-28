@@ -56,6 +56,14 @@ console.log(
  */
 (client as any).commands = await loadCommands();
 
+/**
+ * SYSTEM REGISTRATION
+ * 
+ * Importing systems automatically
+ * registers routes into registries.
+ */
+await import('./systems/help/index.js')
+
 /* ---------------------------------------- */
 /* EVENT LOADING                           */
 /* ---------------------------------------- */

@@ -36,7 +36,7 @@ export function createEmbed({
      *
      * Otherwise only the base footer is used.
      */
-    const footerText = footer ? `${Constants.BASE_FOOTER} • ${footer}` : Constants.BASE_FOOTER;
+    const footerText = footer ? `${Constants.BASE_FOOTER}  •  ${footer}` : `${Constants.BASE_FOOTER}`;
 
     /**
      * Base embed builder instance with shared styling applied.

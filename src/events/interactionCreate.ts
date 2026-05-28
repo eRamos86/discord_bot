@@ -12,7 +12,7 @@
  * - Ownership validation for help menus
  */
 import { guildAllowed } from "../core/guards/guards.js";
-import { handleCommand } from "../core/commands/commandHandler.js";
+import { routeInteraction } from "../core/router/routeInteraction.js";
 
 export default {
 
@@ -36,7 +36,36 @@ export default {
             flags: 64
         });
 
-        // =========================
+        return routeInteraction(interaction, client);
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /* =========================
         // BUTTON INTERACTIONS
         // =========================
         if (interaction.isButton()) {
@@ -47,7 +76,7 @@ export default {
 
                 /**
                  * HELP SYSTEM BUTTON ROUTING
-                 */
+                 /
                 if (id.startsWith("help_")) {
 
                     const parts = id.split(":");
@@ -56,7 +85,7 @@ export default {
                     /**
                      * Prevent users from interacting with
                      * other users' help sessions
-                     */
+                     /
                     if (interaction.user.id !== ownerId) return interaction.reply({
                         content: "This is not your help menu.",
                         flags: 64
@@ -69,7 +98,7 @@ export default {
 
                 /**
                  * TEST / DEBUG BUTTON
-                 */
+                 /
                 if (id === "hello_button") return interaction.reply({
                     content: "Button clicked.",
                     flags: 64
@@ -80,7 +109,7 @@ export default {
                  *
                  * Prevents "This interaction failed" errors
                  * when no handler matches the button.
-                 */
+                 /
                 return await interaction.deferUpdate();
 
             } catch (err) {
@@ -107,7 +136,7 @@ export default {
 
             /**
              * HELP MENU SELECT HANDLING
-             */
+             /
             if (id.startsWith("help_")) {
 
                 const parts = id.split(":");
@@ -115,7 +144,7 @@ export default {
 
                 /**
                  * Prevent cross-user interaction hijacking
-                 */
+                 /
                 if (interaction.user.id !== ownerId) return interaction.reply({
                     content: "This is not your help menu.",
                     flags: 64
@@ -128,7 +157,7 @@ export default {
 
             /**
              * Default behavior prevents unacknowledged interaction errors
-             */
+             /
             return interaction.deferUpdate();
 
         }
@@ -152,7 +181,7 @@ export default {
 
             /**
              * Avoid double-reply errors
-             */
+             /
             if (interaction.replied || interaction.deferred) return;
 
             await interaction.reply({
@@ -161,6 +190,8 @@ export default {
             });
 
         }
+        
     }
 
 };
+*/

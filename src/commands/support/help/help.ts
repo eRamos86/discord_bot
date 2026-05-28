@@ -70,7 +70,7 @@ const command: Command = {
     async execute(ctx) {
 
         // GATHER DATA
-        const {getAllCommands, handleHelpCommand} = await import("../../../core/commands/helpHandler.js");
+        const {getAllCommands, renderHelpView} = await import('../../../systems/help/index.js');
         const all = await getAllCommands();
 
         let category: string | undefined;
@@ -135,7 +135,7 @@ const command: Command = {
 
         }
 
-        return handleHelpCommand(ctx, {
+        return renderHelpView(ctx, {
             category,
             subcategory,
             command

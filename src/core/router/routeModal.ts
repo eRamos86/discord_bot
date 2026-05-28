@@ -1,13 +1,13 @@
 import { MessageFlags } from "discord.js";
-import { getMenuHandler } from "../registry/menuRegistry.js";
+import { getModalHandler } from "../registry/modalRegistry.js";
 
 /**
- * Routs string select menus
- * to registered handlers.
+ * Routes modal submit interactions
+ * to registered handlers based on custom ID.
  */
-export async function routeMenu(interaction: any) {
+export async function routeModal(interaction: any) {
 
-    const handler = getMenuHandler(interaction.customId);
+    const handler = getModalHandler(interaction.customId);
 
     /**
      * No handler found
@@ -18,11 +18,11 @@ export async function routeMenu(interaction: any) {
         return await handler.execute(interaction);
     } catch (err) {
         
-        console.error(`MENU ROUTE ERROR: ${err}`);
+        console.error(`MODAL ROUTE ERROR: ${err}`);
 
         if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({
-                content: 'Menu interaction failed.',
+                content: 'Modal interaction failed.',
                 flags: MessageFlags.Ephemeral
             });
         }

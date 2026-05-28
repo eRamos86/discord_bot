@@ -51,12 +51,27 @@ export async function handleCommand(
     // Normalize prefix command arguments into structured format
     if (!interaction && message) {
 
+        /*
         normalizedArgs = await parsePrefixArgs(
             command,
             args.raw ?? [],
             client,
             message.guild
         );
+        */
+       
+        normalizedArgs = {
+
+            raw: args.raw ?? [],
+
+            ...(await parsePrefixArgs(
+                command,
+                args.raw ?? [],
+                client,
+                message.guild
+            ))
+
+        };
 
     }
 
