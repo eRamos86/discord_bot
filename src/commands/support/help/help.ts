@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js';
 
 import { PermissionLevel } from "../../../core/guards/guards.js";
-import { Command } from "../../../core/commands/command.js";
+import { Command } from '../../../types/command.types.js';
 import { media } from "../../../utils/media.js";
 import { Colors } from "../../../config/theme.js";
 
@@ -43,6 +43,56 @@ const command: Command = {
         `.trim()
     },
 
+    autocomplete: async (interaction) => {
+
+        const { getAllCommands } = await import('../../../systems/help/index.js');
+        const all = await getAllCommands();
+        const focused = interaction.options.getFocused(true);
+        const value = focused.value.toLowerCase();
+
+        let choices: string[] = [];
+
+        /**
+         * CATEGORY AUTOCOMPLETE
+         */
+        if(focused.name === 'category') {
+            choices = [...new Set(all.map(c => c.category))];
+        }
+
+        /**
+         * SUBCATEGORY AUTOCOMPLETE
+         */
+        else if (focused.name === 'subcategory') {
+
+            const category = interaction.options.getString('category');
+
+            if(category) choices = [...new Set(all
+                .filter(c =>
+                    c.category.toLowerCase() === category.toLowerCase()
+                ).map(c => c.subcategory)
+            )];
+
+        }
+
+        /**
+         * COMMAND AUTOCOMPLETE
+         */
+        else if (focused.name === 'command') {
+            choices = all.map(c => c.name);
+        }
+
+        const filtered = choices
+        .filter(choice =>
+            choice.toLowerCase().includes(value)
+        ).slice(0, 25);
+
+        await interaction.respond(filtered.map(choice => ({
+            name: choice,
+            value: choice
+        })));
+
+    },
+
     data: new Discord.SlashCommandBuilder()
 
     .setName('help')
@@ -52,18 +102,21 @@ const command: Command = {
         o
         .setName('category')
         .setDescription('Category to view')
+        .setAutocomplete(true)
         .setRequired(false)
     )
     .addStringOption(o =>
         o
         .setName('subcategory')
         .setDescription('Subcategory to view')
+        .setAutocomplete(true)
         .setRequired(false)
     )
     .addStringOption(o =>
         o
         .setName('command')
         .setDescription('Command to view')
+        .setAutocomplete(true)
         .setRequired(false)
     ),
 

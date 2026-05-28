@@ -1,4 +1,4 @@
-import { registerButton, registerMenu } from '../../core/registry/index.js';
+import { registerButton, registerMenu, registerAutocomplete } from '../../core/registry/index.js';
 
 import { createContext } from '../../core/context/createContext.js';
 import { BotClient } from '../../core/client/client.js';

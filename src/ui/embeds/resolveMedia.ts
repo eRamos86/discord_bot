@@ -6,7 +6,7 @@ import {
 import type * as Types from "../../types/index.js";
 import { fileExists } from '../../utils/fs/fileExists.js';
 import { getFilePath } from '../../utils/fs/getFilePath.js';
-import type * as AceTypes from "../../types/index.js";
+import type * as Types from "../../types/index.js";
 
 /**
  * Resolves a MediaConfig into a usable Discord embed asset.
@@ -34,7 +34,7 @@ export function resolveMedia(options: {
 
     client: Client;
 
-    interaction?: AceTypes.AnyInteraction;
+    interaction?: Types.AnyInteraction;
     message?: Message;
 }): Types.ResolvedMedia {
 

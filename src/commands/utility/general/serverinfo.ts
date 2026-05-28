@@ -3,7 +3,7 @@ import {
 } from "discord.js";
 
 import { PermissionLevel } from "../../../core/guards/guards.js";
-import { Command } from "../../../core/commands/command.js";
+import { Command } from '../../../types/command.types.js';
 import { Colors } from "../../../config/theme.js";
 
 export default{

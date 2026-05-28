@@ -1,13 +1,12 @@
 import { Message } from "discord.js";
 
-import { Command } from "./command.js";
 import { canRun } from "../guards/guards.js";
 import { createContext } from "../context/createContext.js";
 import { BotClient } from "../client/client.js";
 
 import { parsePrefixArgs } from "./parsePrefixArgs.js";
 
-import type * as AceTypes from "../../types/index.js";
+import type * as Types from "../../types/index.js";
 
 /**
  * Core command execution pipeline.
@@ -23,8 +22,8 @@ import type * as AceTypes from "../../types/index.js";
  * ensuring both command types share the same execution lifecycle.
  */
 export async function handleCommand(
-    interaction: AceTypes.AnyInteraction | undefined,
-    command: Command,
+    interaction: Types.AnyInteraction | undefined,
+    command: Types.Command,
     client: BotClient,
     args: Record<string, any> = {},
     message?: Message

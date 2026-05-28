@@ -16,7 +16,7 @@ import {
     Collection
 } from "discord.js";
 
-import { Command } from "../commands/command.js";
+import { Command } from '../../types/command.types.js';
 
 export interface BotClient extends Client {
     /** Runtime-loaded command registry */

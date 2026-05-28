@@ -22,7 +22,6 @@ dotenv.config();
 /* ---------------------------------------- */
 /* CLIENT INITIALIZATION                   */
 /* ---------------------------------------- */
-
 /**
  * Main Discord client instance.
  *
@@ -43,7 +42,6 @@ const client = new Client({intents: [
 /* ---------------------------------------- */
 /* COMMAND LOADING                         */
 /* ---------------------------------------- */
-
 console.log(
     `\n--------------------------\n` +
     `-----LOADING COMMANDS-----\n` +

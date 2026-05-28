@@ -20,6 +20,8 @@ import { Collection } from "discord.js";
 
 import { getCommandFiles } from '../../utils/getCommandFiles.js';
 
+import { registerAutocomplete } from '../registry/autocompleteRegistry.js';
+
 /**
  * Initializes the command system.
  *
@@ -61,6 +63,19 @@ export async function loadCommands() {
         console.log(`[COMMAND LOADED] Command: '${command.data.name}'`);
 
         commands.set(command.data.name, command);
+
+        /**
+         * REGISTER AUTOCOMPLETE
+         */
+        if (command.autocomplete) {
+
+            registerAutocomplete({
+                command: command.data.name,
+                execute: command.autocomplete
+            });
+            console.log(`[AUTOCOMPLETE LOADED ]${command.data.name}`);
+
+        }
 
     }
 

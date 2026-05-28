@@ -5,8 +5,7 @@ import {
 } from "discord.js";
 
 import { OWNER_IDS } from "../../config/owners.js";
-import type * as AceTypes from "../../types/index.js";
-import { Command } from "../commands/command.js";
+import type * as Types from "../../types/index.js";
 
 /**
  * Hierarchical permission levels used across the bot.
@@ -94,7 +93,7 @@ export async function guildAllowed(guild: any): Promise<boolean> {
  * - prefix commands (message)
  */
 export function getPermissionLevel(
-    interaction?: AceTypes.AnyInteraction,
+    interaction?: Types.AnyInteraction,
     message?: Message
 ): number {
 
@@ -152,9 +151,9 @@ export function getPermissionLevel(
  * which abstracts role / hierarchy logic away from this function.
  */
 export function canRun(
-    interaction?: AceTypes.AnyInteraction,
+    interaction?: Types.AnyInteraction,
     message?: Message,
-    command?: Command
+    command?: Types.Command
 ): boolean {
 
     /**

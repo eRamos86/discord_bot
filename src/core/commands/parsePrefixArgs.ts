@@ -6,7 +6,6 @@ import {
     TextBasedChannel
 } from "discord.js";
 
-import { Command } from "./command.js";
 import { BotClient } from "../client/client.js";
 
 import type * as Types from "../../types/index.js";
@@ -24,7 +23,7 @@ import type * as Types from "../../types/index.js";
  * as closely as possible.
  */
 export async function parsePrefixArgs(
-    command: Command,
+    command: Types.Command,
     raw: string[],
     client: BotClient,
     guild: Guild | null

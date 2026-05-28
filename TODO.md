@@ -150,7 +150,10 @@ User assistance systems (non-moderation help systems)
 
     - Help
         * [X] ~~`/help` — main help menu~~ [2026-05-23]
-        * [ ] `/help command:<command>`
+        * [X] ~~`/help <category: cat>` — category menu~~ [2026-05-23]
+        * [X] ~~`/help <category: cat> <subcategory: subcat>` — subcategory menu~~ [2026-05-23]
+        * [X] ~~`/help <command: cmd>` — command view~~ [2026-05-23]
+        * [ ] `/search`
 
     - Other
         * [ ] `/about`
@@ -320,7 +323,7 @@ testing and system upkeep tools
 
 - ADD CACHING FOR HELP COMMAND
 
-- create command router system
+- add autocomplete and modal abstraction features [current]
 
 
 --add redeploy or deploy or reload command
