@@ -1,75 +1,304 @@
-import {
-    SlashCommandBuilder
-} from "discord.js";
+import * as Discord from 'discord.js'
 
 import { PermissionLevel } from "../../../core/guards/guards.js";
 import { Command } from '../../../types/command.types.js';
+import { media } from "../../../utils/media.js";
 import { Colors } from "../../../config/theme.js";
 
-export default{
+const command: Command = {
 
-    aliases: ["servinfo"],
+    /**
+     * use this if you dont want the command to be prefix enabled.
+     * aliases doesnt do anything yet
+     */
+    prefix: {
+        enabled: true,
+        aliases: [],
+    },
+
+    /**
+     * currently this does nothing
+     */
+    aliases: [],
+
+    /**
+     * use this if the required permission level
+     * for this command is anything higher than 'PUBLIC'
+     */
     requiredLevel: PermissionLevel.PUBLIC,
+
+    /**
+     * only really matters if the command has options/args
+     * use this for the autocomplete logic
+     * only works for slash commands
+     * 
+     * @param interaction
+     */
+    /*
+    autocomplete: async (interaction) => {
+        
+        // AUTOCOMPLETE CODE
+        
+    },
+    */
+
     help: {
-        usage: "`/serverinfo`*",
+        usage: "`/command` **`<required>`** *`[optional]`*",
         example: `
-            \`/serverinfo\`
+            \`/command\`
+            \`/command\` **\`req:\`** arg
+            \`/command\` *\`opt:\`* arg
         `.trim()
     },
 
-    data: new SlashCommandBuilder()
-        .setName("serverinfo")
-        .setDescription("provides information about the current server/guild")
-        
-    , // dont forget the comma at the end here
-    
-    async execute(interaction: any, client: any) {
-        
-        //command logic here:
-        
-        const guild = interaction.guild;
+    data: new Discord.SlashCommandBuilder()
+        .setName('serverinfo')
+        .setDescription('some description')
 
-        const embed = createEmbed({
-            title: `Server Information`,
-            desc: `Details about \`${guild.name}\``
-        })
-        .setThumbnail(getThumbnail(client, interaction))
-        // maybe do a tertiary operator thing
-        // to see if certain features are available like banners and stuffs
-        // then display if possible?
-        // order matters.. banners, animated images, etc should be at the top
-        // other stuff (vanity url, etc) can be near the bottom
-        .addFields(
-            {
-                name: `Server name`,
-                value: `${guild.name}`
-            },
-            {
-                name: `Server ID`,
-                value: `${guild.id}`,
-                inline: true
-            },
-            {
-                name: `Server description`,
-                value: `${guild.description}`
-            },
-            {
-                name: `Member Count`,
-                value: `${guild.approximate_member_count}`
-            },
-            {
-                name: `Online`,
-                value: `${guild.approximate_presence_count}`,
-                inline: true
-            }
+        /*
+        optional:
+
+        .addUserOption(option =>
+            option
+                .setName("user")
+                .setDescription("desc")
+                .setRequired(Boolean)
+        )
+
+        .addIntegerOption(option =>
+            option
+                .setName("amount")
+                .setDescription("desc")
+                .setRequired(Boolean)
+        )
+        */
+
+        ,
+
+    async execute(ctx) {
+
+        const guild = ctx.guild;
+
+        if (!guild) {
+            return ctx.reply({
+                content: "This command can only be used in a server."
+            });
+        }
+
+        
+
+        // OWNER
+        const owner = await guild.fetchOwner();
+
+        // MEMBER STATS
+        /**
+         * Cached member stats only.
+         *
+         * Avoids expensive full member chunking
+         * which can gateway rate limit large guilds.
+         */
+        const cachedBots = guild.members.cache.filter(
+            m => m.user.bot
+        ).size;
+
+        const cachedHumans = guild.members.cache.filter(
+            m => !m.user.bot
+        ).size;
+
+        // CHANNEL STATS
+        const textChannels = guild.channels.cache.filter(
+            c => c.type === Discord.ChannelType.GuildText
+        ).size;
+
+        const voiceChannels = guild.channels.cache.filter(
+            c => c.type === Discord.ChannelType.GuildVoice
+        ).size;
+
+        const stageChannels = guild.channels.cache.filter(
+            c => c.type === Discord.ChannelType.GuildStageVoice
+        ).size;
+
+        const forumChannels = guild.channels.cache.filter(
+            c => c.type === Discord.ChannelType.GuildForum
+        ).size;
+
+        const categoryChannels = guild.channels.cache.filter(
+            c => c.type === Discord.ChannelType.GuildCategory
+        ).size;
+
+        const threadChannels = guild.channels.cache.filter(
+            c => c.isThread()
+        ).size;
+
+        // ROLE STATS
+        const roles = guild.roles.cache.size;
+
+        // EMOJI / STICKER STATS
+        const emojis = guild.emojis.cache.size;
+        const stickers = guild.stickers.cache.size;
+
+        // EVENTS
+        const scheduledEvents = guild.scheduledEvents.cache.size;
+
+        // BOOST STATS
+        const boosts = guild.premiumSubscriptionCount ?? 0;
+        const boostTier = guild.premiumTier;
+
+        // FEATURE FLAGS
+        const features = guild.features.length
+            ? guild.features.map(feature => `• ${feature}`).join('\n')
+            : 'None';
+
+        // CREATED TIMESTAMP
+        const created = Math.floor(
+            guild.createdTimestamp / 1000
         );
 
+        // UPLOAD LIMIT
+        const uploadLimit = {
+            0: 8,
+            1: 8,
+            2: 50,
+            3: 100
+        }[guild.premiumTier];
 
-        await interaction.reply({
-            embeds: [embed]
+        // BUILD REPLY
+        await ctx.info({
+            embed: {
+                title: guild.name,
+                desc: guild.description ?? 'No server description.',
+                footer: 'Server Info',
+
+                fields: [
+
+                    /**
+                     * GENERAL
+                     */
+                    {
+                        name: 'General',
+
+                        value: [
+                            `Owner: ${owner}`,
+                            `Created: <t:${created}:F>`,
+                            `Created Relative: <t:${created}:R>`,
+                            `Server ID: \`${guild.id}\``,
+                            `Shard ID: ${guild.shardId ?? 'N/A'}`
+                        ].join('\n'),
+
+                        inline: false
+                    },
+
+                    /**
+                     * MEMBERS
+                     */
+                    {
+                        name: 'Members',
+
+                        value: [
+                            `Total: ${guild.memberCount}`,
+                            `Humans: ${cachedHumans}`,
+                            `Bots: ${cachedBots}`,
+                            `Max Members: ${guild.maximumMembers ?? 'Unknown'}`
+                        ].join('\n'),
+
+                        inline: true
+                    },
+
+                    /**
+                     * CHANNELS
+                     */
+                    {
+                        name: 'Channels',
+
+                        value: [
+                            `Text: ${textChannels}`,
+                            `Voice: ${voiceChannels}`,
+                            `Stages: ${stageChannels}`,
+                            `Forums: ${forumChannels}`,
+                            `Categories: ${categoryChannels}`,
+                            `Threads: ${threadChannels}`
+                        ].join('\n'),
+
+                        inline: true
+                    },
+
+                    /**
+                     * SERVER STATS
+                     */
+                    {
+                        name: 'Server',
+
+                        value: [
+                            `Roles: ${roles}`,
+                            `Emojis: ${emojis}`,
+                            `Stickers: ${stickers}`,
+                            `Events: ${scheduledEvents}`,
+                            `Boosts: ${boosts}`,
+                            `Boost Tier: ${boostTier}`
+                        ].join('\n'),
+
+                        inline: true
+                    },
+
+                    /**
+                     * SECURITY
+                     */
+                    {
+                        name: 'Security',
+
+                        value: [
+                            `Verification: ${guild.verificationLevel}`,
+                            `NSFW Level: ${guild.nsfwLevel}`,
+                            `MFA Level: ${guild.mfaLevel}`,
+                            `Content Filter: ${guild.explicitContentFilter}`
+                        ].join('\n'),
+
+                        inline: true
+                    },
+
+                    /**
+                     * SETTINGS
+                     */
+                    {
+                        name: 'Settings',
+
+                        value: [
+                            `Locale: ${guild.preferredLocale}`,
+                            `Notifications: ${guild.defaultMessageNotifications}`,
+                            `AFK Timeout: ${guild.afkTimeout}s`,
+                            `Max Bitrate: ${guild.maximumBitrate / 1000}kbps`,
+                            `Max Upload: ${uploadLimit}MB`
+                        ].join('\n'),
+
+                        inline: true
+                    },
+
+                    /**
+                     * FEATURES
+                     */
+                    {
+                        name: 'Features',
+
+                        value: features,
+
+                        inline: false
+                    }
+
+                ]
+            },
+
+            /**
+             * MEDIA
+             */
+            thumbnail: media.guild(),
+            image: guild.banner
+            ? media.guild('banner')
+            : undefined,
+            footerIcon: media.local("branding")
         });
-
 
     }
 
 };
+
+export default command;

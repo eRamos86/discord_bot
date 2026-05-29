@@ -323,10 +323,7 @@ testing and system upkeep tools
 
 - ADD CACHING FOR HELP COMMAND
 
-- add autocomplete and modal abstraction features [current]
-
-
---add redeploy or deploy or reload command
+- add modal abstraction features [current]
 
 
 - /serverinfo [current]
@@ -346,3 +343,16 @@ testing and system upkeep tools
 - reaction roles
 - config system
 - owner/dev commands
+
+#
+snapshot of a reload reply from my old python bot:
+#
+Reloaded Cogs: 8ball, addrole, am_i, avatar, balance, ban, bonk, cap, clap, claps, createrole, cum, emclaps, f, feedback, fuck, giveaway, givecookie, gm, gofuckyourself, hello, historyteacher, hug, ischirpygay, kick, kiss, load, meme, mention, motivate, mute, nick, on_command_error, on_guild_join, on_guild_remove, on_member_join, on_message, on_message_delete, on_message_edit, on_raw_reaction_add, on_raw_reaction_remove, on_ready, pets, ping, poll, prefix, purge, rate, reactionroles, reload, rules, say, serverinfo, slap, stab, takerole, test, tictactoe, timer, topic, twitch, unban, unload, unmute, uvu, uwufy, uwufy2, uwufy3, wall, warn, warnings, whatshouldido, whois, whospogger, wouldyourather! (75)
+Failed Cogs: help... :c (1)
+
+
+Reloaded Functions: start, status! (2)
+Failed Functions: economy... :c (1)
+
+All variables were reloaded!
+No classes could be reloaded

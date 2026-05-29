@@ -3,10 +3,9 @@ import {
     Message,
     AttachmentBuilder
 } from "discord.js";
-import type * as Types from "../../types/index.js";
+import type * as Types from '../../types/index.js';
 import { fileExists } from '../../utils/fs/fileExists.js';
 import { getFilePath } from '../../utils/fs/getFilePath.js';
-import type * as Types from "../../types/index.js";
 
 /**
  * Resolves a MediaConfig into a usable Discord embed asset.
@@ -29,12 +28,29 @@ import type * as Types from "../../types/index.js";
  * 3. bot avatar as final fallback
  */
 export function resolveMedia(options: {
+    /**
+     * Embed location.
+     * 
+     * Used for fallback directory lookup.
+     */
     location: Types.MediaLocation;
+    /**
+     * Media configuration to resolve.
+     */
     media: Types.MediaConfig;
 
+    /**
+     * Active Discord client.
+     */
     client: Client;
 
+    /**
+     * Interaction context.
+     */
     interaction?: Types.AnyInteraction;
+    /**
+     * Message context.
+     */
     message?: Message;
 }): Types.ResolvedMedia {
 
@@ -47,88 +63,108 @@ export function resolveMedia(options: {
     } = options;
 
     /**
-     * Cached bot avatar used as global fallback.
+     * Shared context references.
+     */
+    const guild = interaction?.guild || message?.guild;
+    const currentUser = interaction?.user || message?.author;
+
+    /**
+     * Global fallback avatar.
      */
     const botAvatar = client.user?.displayAvatarURL({ size: 512 }) ?? '';
 
     switch (media.type) {
 
         /**
-         * USER MEDIA
-         *
-         * Resolves to:
-         * - interaction user avatar (preferred)
-         * - message author avatar (fallback)
-         * - bot avatar (final fallback)
+         * CURRENT USER MEDIA
          */
-        case "user":
-            return {
-                url: interaction?.user.displayAvatarURL({ size: 512 }) || message?.author.displayAvatarURL({ size: 512 }) || botAvatar
-            };
+        case "user": {
+
+            if (!currentUser) return { url: botAvatar };
+
+            switch (media.asset) {
+                case "banner": return {url: currentUser.bannerURL?.({ size: 2048 }) || botAvatar};
+                default: return {url: currentUser.displayAvatarURL({ size: 512 })};
+            }
+
+        }
 
         /**
          * TARGET USER MEDIA
-         *
-         * Explicit user provided in config.
          */
-        case "targetUser":
-            return {
-                url: media.user.displayAvatarURL({ size: 512 })
-            };
+        case "targetUser": {
+
+            switch (media.asset) {
+                case "banner": return {url: media.user.bannerURL?.({ size: 2048 }) || botAvatar};
+                default: return {url: media.user.displayAvatarURL({ size: 512 })};
+            }
+
+        }
 
         /**
          * GUILD MEDIA
-         *
-         * Resolves to guild icon if available.
-         * Falls back to bot avatar if missing.
          */
-        case "guild":
-            return {
-                url: interaction?.guild?.iconURL({ size: 512 }) || botAvatar
-            };
+        case "guild": {
+
+            if (!guild) return { url: botAvatar };
+
+            switch (media.asset) {  
+
+                case "banner": return {url: guild.bannerURL({ size: 2048 }) || botAvatar};
+                case "splash": return {url: guild.splashURL({ size: 2048 }) || botAvatar};
+                case "discoverySplash": return {url: guild.discoverySplashURL({ size: 2048 }) || botAvatar};
+                default: return {url: guild.iconURL({ size: 1024 }) || botAvatar};
+
+            }
+        }
 
         /**
          * BOT MEDIA
-         *
-         * Always resolves to bot avatar.
          */
-        case "bot":
-            return {
-                url: botAvatar
-            };
+        case "bot": {
+
+            if (!client.user) return { url: botAvatar };
+
+            switch (media.asset) {
+
+                case "banner": return {url: client.user.bannerURL?.({ size: 2048 }) || botAvatar};
+                default: return {url: client.user.displayAvatarURL({ size: 512 })};
+
+            }
+        }
 
         /**
          * LOCAL FILE MEDIA
-         *
-         * Resolves filesystem-based assets stored in:
-         * /src/images/<location>/
-         *
-         * Priority:
-         * 1. requested file
-         * 2. default.png fallback handled later
          */
-        case "local":
+        case "local": {
 
             const exactFile = `${media.file}.png`;
+    
             if (fileExists(location, exactFile)) return {
+    
                 url: `attachment://${exactFile}`,
                 attachment: new AttachmentBuilder(
                     getFilePath(location, exactFile),
                     { name: exactFile }
                 )
+    
             };
+
+            break;
+
+        }
 
     }
 
     /**
-     * DEFAULT FILE FALLBACK
+     * DEFAULT LOCAL FALLBACK
      *
-     * If requested asset is missing, attempt to load:
-     * /src/images/<location>/default.png
+     * Attempts to resolve:
+     * /images/<location>/default.png
      */
     const defaultFile = "default.png";
 
-    if (fileExists(location, defaultFile)) return {
+    if(fileExists(location, defaultFile)) return {
         url: `attachment://${defaultFile}`,
         attachment: new AttachmentBuilder(
             getFilePath(location, defaultFile),
@@ -139,11 +175,8 @@ export function resolveMedia(options: {
     /**
      * FINAL FALLBACK
      *
-     * If no assets exist at all, fall back to bot avatar.
-     * This guarantees the embed never breaks visually.
+     * Guarantees embeds always contain valid media.
      */
-    return {
-        url: botAvatar
-    };
+    return {url: botAvatar};
 
 }

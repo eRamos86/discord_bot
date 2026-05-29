@@ -18,7 +18,8 @@ import {
     MessageFlags
 } from "discord.js";
 
-import { EmbedOptions, MediaConfig } from "./embed.types.js";
+import { EmbedOptions } from "./embed.types.js";
+import { MediaConfig } from './media.types.js';
 import { BotClient } from "../core/client/client.js";
 
 /**
@@ -107,7 +108,7 @@ export type CommandContext = BaseContext & {
     reply: (options: ReplyOptions) => Promise<any>;
     editReply: (options: EditReplyOptions) => Promise<any>;
     followUp: (options: ReplyOptions) => Promise<any>;
-    defer: (ephemeral?: boolean) => Promise<any>;
+    defer: (flags?: MessageFlags | number) => Promise<any>;
     send: (options: ReplyOptions) => Promise<any>;
     edit: (options: EditReplyOptions) => Promise<any>;
 

@@ -35,7 +35,7 @@ export type Command = {
     /**
      * Minimum permission level required to execute this command.
      */
-    requiredLevel: PermissionLevel;
+    requiredLevel?: PermissionLevel | PermissionLevel.PUBLIC;
 
     /**
      * Help menu metadata shown in help commands/UI.

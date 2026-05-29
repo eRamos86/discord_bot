@@ -110,6 +110,40 @@ for (const file of eventFiles) {
 }
 
 /* ---------------------------------------- */
+/* ERROR HANDLING                           */
+/* ---------------------------------------- */
+
+/**
+ * Prevent Discord.js client errors
+ * from crashing the process.
+ */
+client.on("error", (error) => {
+    console.error("[DISCORD CLIENT ERROR]");
+    console.error(error);
+});
+
+/**
+ * Websocket / shard errors.
+ */
+client.on("shardError", (error) => {
+    console.error("[SHARD ERROR]");
+    console.error(error);
+});
+
+/**
+ * Node promise safety.
+ */
+process.on("unhandledRejection", (reason) => {
+    console.error("[UNHANDLED REJECTION]");
+    console.error(reason);
+});
+
+process.on("uncaughtException", (error) => {
+    console.error("[UNCAUGHT EXCEPTION]");
+    console.error(error);
+});
+
+/* ---------------------------------------- */
 /* BOT LOGIN                               */
 /* ---------------------------------------- */
 

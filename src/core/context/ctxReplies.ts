@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 import {
     createEmbed,
     createEmbedPayload
@@ -68,9 +69,10 @@ export function createReplies(
     /**
      * Defer interaction response.
      */
-    const defer = async (ephemeral = false) => {
-        if (interaction) return interaction.deferReply({ ephemeral });
-    };
+    const defer = async (flags: MessageFlags | number = MessageFlags.Ephemeral) => {
+        if (!interaction) return;
+        return interaction.deferReply({flags});
+    }
 
     /**
      * Send message to current channel.
