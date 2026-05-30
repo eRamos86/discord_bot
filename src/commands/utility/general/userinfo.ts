@@ -3,9 +3,12 @@ import {
     User, GuildMember
 } from "discord.js";
 
-import { PermissionLevel } from "../../../core/guards/guards.js";
+import { PermissionLevel } from "../../../framework/guards/guards.js";
 import { Command } from '../../../types/command.types.js';
+/*
 import { media } from "../../../utils/media.js";
+*/
+import * as Utils from '../../../utils/index.js';
 import { Colors } from "../../../config/theme.js";
 
 function isGuildMember(x: any): x is GuildMember {
@@ -62,8 +65,8 @@ const command : Command = {
                 `.trim(),
                 footer: "User Information"
             },
-            thumbnail: media.targetUser(user),
-            footerIcon: media.local('branding')
+            thumbnail: Utils.media.targetUser(user),
+            footerIcon: Utils.media.local('branding')
             
         });
 

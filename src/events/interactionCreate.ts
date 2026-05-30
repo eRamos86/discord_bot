@@ -11,8 +11,8 @@
  * - Global guild access restrictions
  * - Ownership validation for help menus
  */
-import { guildAllowed } from "../core/guards/guards.js";
-import { routeInteraction } from "../core/router/routeInteraction.js";
+import { guildAllowed } from "../framework/guards/guards.js";
+import { routeInteraction } from "../framework/router/routeInteraction.js";
 
 export default {
 

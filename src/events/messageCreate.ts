@@ -1,5 +1,5 @@
-import { guildAllowed } from "../core/guards/guards.js";
-import { handleCommand } from "../core/commands/commandHandler.js";
+import { guildAllowed } from "../framework/guards/guards.js";
+import { handleCommand } from "../framework/commands/commandHandler.js";
 import { botConfig } from "../config/botConfig.js";
 
 export default {

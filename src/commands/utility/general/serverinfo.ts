@@ -1,8 +1,8 @@
 import * as Discord from 'discord.js'
 
-import { PermissionLevel } from "../../../core/guards/guards.js";
+import { PermissionLevel } from "../../../framework/guards/guards.js";
 import { Command } from '../../../types/command.types.js';
-import { media } from "../../../utils/media.js";
+import { media } from "../../../framework/embed/media.js";
 import { Colors } from "../../../config/theme.js";
 
 const command: Command = {

@@ -1,7 +1,11 @@
 import { SlashCommandBuilder, AutocompleteInteraction } from 'discord.js';
 
-import { PermissionLevel } from "../core/guards/guards.js";
-import type { CommandContext } from './context.types.js';
+import {
+    PermissionLevel,
+    CommandContext
+} from '@framework';
+
+
 
 /**
  * Standard command definition used by the command handler system.

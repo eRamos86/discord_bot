@@ -1,8 +1,8 @@
 import * as Discord from 'discord.js';
 
-import { PermissionLevel } from "../../../core/guards/guards.js";
+import { PermissionLevel } from "../../../framework/guards/guards.js";
 import { Command } from '../../../types/command.types.js';
-import { media } from "../../../utils/media.js";
+import { media } from "../../../framework/embed/media.js";
 import { Colors } from "../../../config/theme.js";
 
 /**
@@ -45,7 +45,7 @@ const command: Command = {
 
     autocomplete: async (interaction) => {
 
-        const { getAllCommands } = await import('../../../systems/help/index.js');
+        const { getAllCommands } = await import('../../../features/help/index.js');
         const all = await getAllCommands();
         const focused = interaction.options.getFocused(true);
         const value = focused.value.toLowerCase();
@@ -123,7 +123,7 @@ const command: Command = {
     async execute(ctx) {
 
         // GATHER DATA
-        const {getAllCommands, renderHelpView} = await import('../../../systems/help/index.js');
+        const {getAllCommands, renderHelpView} = await import('../../../features/help/index.js');
         const all = await getAllCommands();
 
         let category: string | undefined;

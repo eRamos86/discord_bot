@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
-import { deploy } from './utils/deploy.js';
+import * as Utils from '@utils';
 
 dotenv.config();
 
-const result = await deploy();
+const result = await Utils.deploy();
 
 if (!result.success) {
 

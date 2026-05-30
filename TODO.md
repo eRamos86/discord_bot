@@ -320,7 +320,7 @@ testing and system upkeep tools
 
 
 
-
+- make sure CommandContext has everythigng i'd need fr later commands. i never have to defferentiate between interaction vs message.
 - ADD CACHING FOR HELP COMMAND
 
 - add modal abstraction features [current]

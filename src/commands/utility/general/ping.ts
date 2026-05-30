@@ -4,18 +4,18 @@ import {
     Client
 } from "discord.js";
 
-import { PermissionLevel } from "../../../core/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-import { media } from "../../../utils/media.js";
-import { Colors } from "../../../config/theme.js";
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
-const command : Command = {
+const command: Command = {
 
     prefix: {
-        enabled: true
+        enabled: true,
+        aliases: []
     },
 
     aliases: [],
+
     requiredLevel: PermissionLevel.PUBLIC,
 
     help: {
@@ -30,14 +30,48 @@ const command : Command = {
     .setDescription('Replies with pong. Used to test Bot connectivity.'),
 
     async execute(ctx) {
+        
+        const start = performance.now();
+        const gatewayPing = ctx.client.ws.ping;
+        const uptime = Utils.formatDuration(ctx.client.uptime ?? 0);
+        const memory = process.memoryUsage();
+        const ramMb = (memory.rss / 1024 / 1024).toFixed(1);
+        const heapMb = (memory.heapUsed / 1024 / 1024).toFixed(1);
+        const responseLatency = Math.round(performance.now() - start);
+        const latency = Date.now() - ctx.createdTimestamp;
 
         ctx.success({
-
             embed: {
                 title: 'Pong!',
-                desc: 'Latency test'
+                desc: 'Response test...',
+                fields: [
+                    {
+                        name: 'Gateway Ping',
+                        value: `${gatewayPing}ms`,
+                        inline: true
+                    },
+                    {
+                        name: 'Response Time',
+                        value: `${latency}ms`,
+                        inline: true
+                    },
+                    {
+                        name: 'Uptime',
+                        value: uptime,
+                        inline: false
+                    },
+                    {
+                        name: 'RAM Usage',
+                        value: `${ramMb} MB`,
+                        inline: true
+                    },
+                    {
+                        name: 'Heap Usage',
+                        value: `${heapMb} MB`,
+                        inline: true
+                    }
+                ]
             }
-            
         });
 
     }
