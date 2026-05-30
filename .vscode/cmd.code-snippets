@@ -3,12 +3,9 @@
 	"scope": "javascript,typescript",
     "prefix": "cmd",
     "body": [
-      "import * as Discord from 'discord.js'",
-      "",
-      "import { PermissionLevel } from \"../../../core/guards/guards.js\";",
-      "import { Command } from '../../../types/command.types.js';",
-      "import { media } from \"../../../utils/media.js\";",
-      "import { Colors } from \"../../../config/theme.js\";",
+      "import * as dis from 'discord.js';",
+      "import * as ace from '@framework';",
+      "import * as Utils from '@utils';",
       ""
     ],
     "description": "Creates Discord Command imports"

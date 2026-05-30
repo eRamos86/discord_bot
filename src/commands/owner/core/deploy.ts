@@ -1,15 +1,9 @@
-import * as Discord from 'discord.js'
+import * as dis from 'discord.js';
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
-import { PermissionLevel } from "../../../framework/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-import { media } from "../../../framework/embed/media.js";
-import { Colors } from "../../../config/theme.js";
 
-import { deploy } from '../../../utils/deploy.js';
-
-import { BotClient } from '../../../framework/client/client.js';
-
-const command: Command = {
+const command: ace.Command = {
 
     /**
      * use this if you dont want the command to be prefix enabled.
@@ -29,7 +23,7 @@ const command: Command = {
      * use this if the required permission level
      * for this command is anything higher than 'PUBLIC'
      */
-    requiredLevel: PermissionLevel.OWNER,
+    requiredLevel: ace.PermissionLevel.OWNER,
 
     /**
      * only really matters if the command has options/args
@@ -44,7 +38,7 @@ const command: Command = {
             .getFocused()
             .toLowerCase();
 
-        const client = interaction.client as BotClient;
+        const client = interaction.client as ace.BotClient;
 
         const commands = [
             ...client.commands.values()
@@ -101,7 +95,7 @@ const command: Command = {
         `.trim()
     },
 
-    data: new Discord.SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
         .setName('deploy')
         .setDescription('Deploy commands to Discord')
 
@@ -140,7 +134,7 @@ const command: Command = {
 
         await ctx.defer();
 
-        const result = await deploy({commandName});
+        const result = await Utils.deploy({commandName});
 
         if (!result.success) {
             return ctx.error({
@@ -149,8 +143,8 @@ const command: Command = {
                     desc: result.errors.join('\n')
                 },
 
-                thumbnail: media.local('error'),
-                flags: Discord.MessageFlags.Ephemeral
+                thumbnail: ace.media.local('error'),
+                flags: dis.MessageFlags.Ephemeral
             });
         }
 
@@ -187,8 +181,8 @@ const command: Command = {
                 ]
             },
 
-            thumbnail: media.local('success'),
-            flags: Discord.MessageFlags.Ephemeral
+            thumbnail: ace.media.local('success'),
+            flags: dis.MessageFlags.Ephemeral
         });
 
     }

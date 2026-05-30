@@ -21,7 +21,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a resolved User argument (if already provided by parser).
      */
     const getUser = async (name: string): Promise<User | null> => {
-        const value = args[name];
+        const value = ctx.args[name];
         return value instanceof User ? value : null;
     };
 
@@ -29,7 +29,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a resolved GuildMember argument.
      */
     const getMember = async (name: string): Promise<GuildMember | null> => {
-        const value = args[name];
+        const value = ctx.args[name];
         return value instanceof GuildMember ? value : null;
     };
 
@@ -37,7 +37,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a resolved Role argument.
      */
     const getRole = async (name: string): Promise<Role | null> => {
-        const value = args[name];
+        const value = ctx.args[name];
         return value instanceof Role ? value : null;
     };
 
@@ -45,7 +45,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a text-based channel argument.
      */
     const getChannel = async (name: string): Promise<TextBasedChannel | null> => {
-        const value = args[name];
+        const value = ctx.args[name];
         if (value && typeof value === "object" && "send" in value) return value as TextBasedChannel;
         return null;
     };
@@ -54,7 +54,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a string argument.
      */
     const getString = (name: string): string | null => {
-        const value = args[name];
+        const value = ctx.args[name];
         return typeof value === "string" ? value : null;
     };
 
@@ -62,7 +62,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a number argument.
      */
     const getNumber = (name: string): number | null => {
-        const value = args[name];
+        const value = ctx.args[name];
         return typeof value === "number" ? value : null;
     };
 
@@ -70,7 +70,7 @@ export function createGetters(ctx: BaseContext) {
      * Gets a boolean argument.
      */
     const getBoolean = (name: string): boolean | null => {
-        const value = args[name];
+        const value = ctx.args[name];
         return typeof value === "boolean" ? value : null;
     };
 

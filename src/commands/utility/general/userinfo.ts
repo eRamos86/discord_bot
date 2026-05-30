@@ -1,28 +1,19 @@
-import {
-    SlashCommandBuilder,
-    User, GuildMember
-} from "discord.js";
+import * as dis from 'discord.js';
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
-import { PermissionLevel } from "../../../framework/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-/*
-import { media } from "../../../utils/media.js";
-*/
-import * as Utils from '../../../utils/index.js';
-import { Colors } from "../../../config/theme.js";
-
-function isGuildMember(x: any): x is GuildMember {
+function isGuildMember(x: any): x is dis.GuildMember {
     return x && typeof x === "object" && "user" in x;
 }
 
-const command : Command = {
+const command : ace.Command = {
 
     prefix: {
         enabled: true
     },
 
     aliases: ["uinfo"],
-    requiredLevel: PermissionLevel.PUBLIC,
+    requiredLevel: ace.PermissionLevel.PUBLIC,
 
     help: {
         usage: "`/userinfo` *`[user]`*",
@@ -33,7 +24,7 @@ const command : Command = {
     },
 
     // COMMAND DATA
-    data: new SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
     .setName("userinfo")
     .setDescription("Get info about a user")
     .addUserOption(option =>
@@ -49,7 +40,8 @@ const command : Command = {
 
         // GATHER DATA
         const _user = (await ctx.getUser("user")) ?? ctx.user;
-        const user: User = isGuildMember(_user)
+        console.log(_user);
+        const user: dis.User = isGuildMember(_user)
         ? _user.user
         : _user;
 
@@ -65,8 +57,8 @@ const command : Command = {
                 `.trim(),
                 footer: "User Information"
             },
-            thumbnail: Utils.media.targetUser(user),
-            footerIcon: Utils.media.local('branding')
+            thumbnail: ace.media.targetUser(user),
+            footerIcon: ace.media.local('branding')
             
         });
 

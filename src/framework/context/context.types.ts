@@ -116,12 +116,14 @@ export type CommandContext = BaseContext & {
     send: (options: ReplyOptions) => Promise<any>;
     edit: (options: EditReplyOptions) => Promise<any>;
 
+    replyEmbed: (options: EmbedReplyOptions) => Promise<any>;
     editEmbed: (options: EmbedReplyOptions) => Promise<any>;
 
-    replyEmbed: (options: EmbedReplyOptions) => Promise<any>;
     success: (options: EmbedReplyOptions) => Promise<any>;
     error: (options: EmbedReplyOptions) => Promise<any>;
     warn: (options: EmbedReplyOptions) => Promise<any>;
+    danger: (options: EmbedReplyOptions) => Promise<any>;
+
     info: (options: EmbedReplyOptions) => Promise<any>;
     
 };

@@ -1,18 +1,15 @@
-import { MessageFlags, SlashCommandBuilder } from "discord.js";
+import * as dis from 'discord.js';
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
-import { PermissionLevel } from "../../../framework/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-import { media } from "../../../framework/embed/media.js";
-import { Colors } from "../../../config/theme.js";
-
-const command: Command = {
+const command: ace.Command = {
 
     prefix: {
         enabled: true
     },
 
     aliases: [],
-    requiredLevel: PermissionLevel.MOD,
+    requiredLevel: ace.PermissionLevel.MOD,
 
     help: {
         usage: "`/purge` **`[amt]`**",
@@ -22,7 +19,7 @@ const command: Command = {
     },
 
     // COMMAND DATA
-    data: new SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
     .setName('purge')
     .setDescription('Delete specified amount of messages.')
     .addIntegerOption(o =>
@@ -50,9 +47,9 @@ const command: Command = {
         const messages = await ctx.channel.delete(amount);
 
         // BUILD REPLY
-        await ctx.reply({
+        await ctx.channel.send({
             content: `Deleted ${messages.size} messages.`,
-            flags: MessageFlags.Ephemeral
+            flags: dis.MessageFlags.Ephemeral
         });
 
     },

@@ -73,7 +73,7 @@ export type DeployOptions = {
 export async function deploy(options: DeployOptions = {}): Promise<DeployResult> {
 
     const started = Date.now();
-    const rest = new REST({version: '10'}).setToken(process.env.TOKEN!);
+    const rest = new REST({version: '10'}).setToken(process.env.DISCORD_TOKEN!);
     const commandsPath = path.join(
         process.cwd(),
         'src',

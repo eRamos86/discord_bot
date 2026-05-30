@@ -47,7 +47,6 @@ export function createReplies(
         if (interaction.replied || interaction.deferred) return interaction.followUp(options);
         return interaction.reply(options);
     };
-
     /**
      * Edit last reply or interaction response.
      */
@@ -56,7 +55,6 @@ export function createReplies(
         if (state.storedReply) return state.storedReply.edit(options);
         throw new Error("No reply available to edit");
     };
-
     /**
      * Send follow-up message.
      */
@@ -65,7 +63,6 @@ export function createReplies(
         if (message) return message.reply(options);
         throw new Error("No interaction or message available");
     };
-
     /**
      * Defer interaction response.
      */
@@ -73,7 +70,6 @@ export function createReplies(
         if (!interaction) return;
         return interaction.deferReply({flags});
     }
-
     /**
      * Send message to current channel.
      */
@@ -81,7 +77,6 @@ export function createReplies(
         if (!ctx.channel || !("send" in ctx.channel)) throw new Error("Channel is not text-based");
         return ctx.channel.send(options);
     };
-
     /**
      * Edit message or interaction response.
      */
@@ -126,7 +121,6 @@ export function createReplies(
         });
 
     };
-
     /**
      * Edit embed response.
      */
@@ -161,6 +155,7 @@ export function createReplies(
         defer,
         send,
         edit,
+
         replyEmbed,
         editEmbed,
 
@@ -176,6 +171,11 @@ export function createReplies(
             ...o,
             embed: { ...o.embed, color: Colors.warning }
         }),
+        danger: (o: any) => replyEmbed({
+            ...o,
+            embed: { ...o.embed, color: Colors.danger }
+        }),
+
         info: (o: any) => replyEmbed({
             ...o,
             embed: { ...o.embed, color: Colors.neutral }

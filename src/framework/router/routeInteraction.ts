@@ -18,6 +18,6 @@ export async function routeInteraction(
     if (interaction.isStringSelectMenu()) return routeMenu(interaction);
     if (interaction.isModalSubmit()) return routeModal(interaction);
     if (interaction.isAutocomplete()) return routeAutocomplete(interaction);
-    if (interaction.isChatInputCommand()) return routeCommand(interaction, client);
+    if (interaction.isChatInputCommand()) return routeCommand({interaction, client});
 
 }

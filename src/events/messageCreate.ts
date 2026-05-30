@@ -1,74 +1,77 @@
-import { guildAllowed } from "../framework/guards/guards.js";
-import { handleCommand } from "../framework/commands/commandHandler.js";
-import { botConfig } from "../config/botConfig.js";
+import * as dis from "discord.js";
+import * as ace from "@framework";
 
 export default {
     name: "messageCreate",
 
-    async execute(message: any, client: any) {
-
-        console.log("hello from messageCreate.ts");
-
-        // ignore bots
+    async execute(message: dis.Message, client: ace.BotClient) {
         if (message.author.bot) return;
-
-        // guild lock
         if (!message.guild) return;
 
-        const allowed = await guildAllowed(message.guild);
-        if (!allowed) return;
+        console.log(
+            `Message Created in '${message.guild.name}' by '${message.author.tag}': "${message.content}"`
+        );
 
-        const prefix = botConfig.prefix;
+        const prefix = ace.botConfig.prefix;
+        const mentionPrefix = `<@${client.user?.id}>`;
 
-        // allow mention prefix too
-        const mentionPrefix = `<@${client.user.id}>`;
-
-        const usedPrefix =
-            message.content.startsWith(prefix)
-                ? prefix
-                : message.content.startsWith(mentionPrefix)
-                    ? mentionPrefix
-                    : null;
+        const usedPrefix = message.content.startsWith(prefix)
+            ? prefix
+            : message.content.startsWith(mentionPrefix)
+                ? mentionPrefix
+                : null;
 
         if (!usedPrefix) return;
 
-        // remove prefix
+        console.log(`prefix detected! '${usedPrefix}'`);
+
+        const allowed = await ace.guildAllowed(message.guild);
+        const ctx = await ace.createContext({
+            message,
+            client,
+            args: {}
+        });
+
+        if (!allowed) {
+            return ctx.danger({
+                embed: {
+                    title: "Bot Disabled",
+                    desc: "This server has disabled the bot.",
+                    fields: [
+                        {
+                            name: "This may not be known-",
+                            value: "is Ace in the server?\nIs he an admin?"
+                        },
+                        {
+                            name: "if not-",
+                            value: "i dont have permission to run any commands here :c"
+                        }
+                    ]
+                }
+            });
+        }
+
         const args = message.content
             .slice(usedPrefix.length)
             .trim()
             .split(/\s+/);
 
         const commandName = args.shift()?.toLowerCase();
-        if (!commandName) return;
 
-        // find command
-        const command =
-            client.commands.get(commandName) ||
-            [...client.commands.values()].find((cmd: any) =>
-                cmd.aliases?.includes(commandName)
-            );
-
-        if (!command) return;
-
-        // PREFIX GATE
-        if (command.prefix?.enabled === false) {
-            return message.reply("This command cannot be used with prefix.");
+        if (!commandName) {
+            return ctx.info({
+                embed: {
+                    title: `Hello! I'm AceBot`,
+                    desc: `do you need help? run\n\`${prefix}help\` or \`/help\``
+                }
+            });
         }
 
-        try {
-            console.log("MESSAGE CREATE FIRED:", message.content);
-            return await handleCommand(
-                undefined,       // interaction
-                command,
-                client,
-                {
-                    raw: args,
-                    commandName
-                },
-                message      // <-- IMPORTANT
-            );
-        } catch (err) {
-            console.error(err);
-        }
+        return ace.routeCommand({
+            client,
+            message,
+            commandName,
+            args
+        });
     }
 };

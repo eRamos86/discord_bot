@@ -1,7 +1,4 @@
-import { registerButton, registerMenu, registerAutocomplete } from '../../framework/registry/index.js';
-
-import { createContext } from '../../framework/context/createContext.js';
-import { BotClient } from '../../framework/client/client.js';
+import * as ace from '@framework';
 import { renderHelpView } from './help.views.js';
 
 /********************
@@ -14,7 +11,7 @@ import { renderHelpView } from './help.views.js';
 /**
  * HELP BACK BUTTON
  */
-registerButton({
+ace.registerButton({
 
     id: 'help:back',
 
@@ -22,9 +19,9 @@ registerButton({
         
         await interaction.deferUpdate();
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: {}
         });
 
@@ -37,7 +34,7 @@ registerButton({
 /**
  * HELP CATEGORY BACK BUTTON
  */
-registerButton({
+ace.registerButton({
 
     id: 'help:cat',
 
@@ -49,9 +46,9 @@ registerButton({
 
         const category = parts[2];
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: []
         });
 
@@ -64,7 +61,7 @@ registerButton({
 /**
  * HELP SUBCATEGORY BACK BUTTON
  */
-registerButton({
+ace.registerButton({
 
     id: 'help:sub',
 
@@ -77,9 +74,9 @@ registerButton({
         const category = parts[2];
         const subcategory = parts[3];
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: {}
         });
 
@@ -92,7 +89,7 @@ registerButton({
 /**
  * CATEGORY SELECT MENU
  */
-registerMenu({
+ace.registerMenu({
 
     id: 'help:category',
     
@@ -102,9 +99,9 @@ registerMenu({
 
         const category = interaction.values[0];
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: {}
         });
 
@@ -117,7 +114,7 @@ registerMenu({
 /**
  * SUBCATEGORY SELECT MENU
  */
-registerMenu({
+ace.registerMenu({
 
     id: 'help:subcategory',
 
@@ -130,9 +127,9 @@ registerMenu({
         const category = parts[2];
         const subcategory = interaction.values[0];
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: {}
         });
 
@@ -145,7 +142,7 @@ registerMenu({
 /**
  * COMMAND SELECT MENU
  */
-registerMenu({
+ace.registerMenu({
 
     id: 'help:command',
 
@@ -160,9 +157,9 @@ registerMenu({
 
         const command = interaction.values[0];
 
-        const ctx = await createContext({
+        const ctx = await ace.createContext({
             interaction,
-            client: interaction.client as BotClient,
+            client: interaction.client as ace.BotClient,
             args: {}
         });
 

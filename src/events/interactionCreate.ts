@@ -11,8 +11,7 @@
  * - Global guild access restrictions
  * - Ownership validation for help menus
  */
-import { guildAllowed } from "../framework/guards/guards.js";
-import { routeInteraction } from "../framework/router/routeInteraction.js";
+import * as ace from '@framework';
 
 export default {
 
@@ -30,13 +29,13 @@ export default {
          *
          * Prevents bot usage in unauthorized servers
          */
-        const allowed = await guildAllowed(interaction.guild);
+        const allowed = await ace.guildAllowed(interaction.guild);
         if (!allowed) return interaction.reply({
             content: "Bot is disabled in this server.",
             flags: 64
         });
 
-        return routeInteraction(interaction, client);
+        return ace.routeInteraction(interaction, client);
 
     }
 

@@ -1,21 +1,12 @@
-
-import {
-    Client,
-    GatewayIntentBits
-} from 'discord.js';
-
-import {
-    fileURLToPath,
-    pathToFileURL
-} from 'url';
+import * as dis from 'discord.js';
+import * as url from 'url';
 import fs from 'fs';
 import path from 'path';
+import * as ace from '@framework';
 import dotenv from 'dotenv';
 
-import * as Ace from '@framework';
-
 // pre
-const __filename = fileURLToPath(import.meta.url);
+const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 
@@ -31,11 +22,11 @@ dotenv.config();
      */
     console.log('Initializing Discord bot client...');
 
-    const client = new Client({intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
+    const client = new dis.Client({intents: [
+        dis.GatewayIntentBits.Guilds,
+        dis.GatewayIntentBits.GuildMembers,
+        dis.GatewayIntentBits.GuildMessages,
+        dis.GatewayIntentBits.MessageContent,
     ]});
 
 //#endregion
@@ -46,7 +37,7 @@ dotenv.config();
      * Loads all commands from the command directory and attaches
      * them to the client for runtime access
      */
-    (client as Ace.BotClient).commands = await Ace.loadCommands();
+    (client as ace.BotClient).commands = await ace.loadCommands();
 
 //#endregion
 
@@ -85,7 +76,7 @@ dotenv.config();
     for (const file of eventFiles) {
 
         const filePath = path.join(eventsPath, file);
-        const event = await import(pathToFileURL(filePath).href);
+        const event = await import(url.pathToFileURL(filePath).href);
 
         const eventName = event.default.name;
         const execute = event.default.execute;

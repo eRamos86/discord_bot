@@ -1,15 +1,9 @@
 /**
  * Guards and permission checks for bot commands.
  */
-import {
-    PermissionsBitField,
-    GuildMember,
-    Message
-} from "discord.js";
-
-import { OWNER_IDS } from "@config";
-import type { Command } from '@types';
-import * as Context from '../context/context.types.js';
+import * as dis from "discord.js";
+import * as ace from '@framework';
+import { access } from "fs/promises";
 
 /**
  * Hierarchical permission levels used across the bot.
@@ -62,7 +56,7 @@ export async function guildAllowed(guild: any): Promise<boolean> {
     /**
      * Resolve all configured owners who are present in this guild
      */
-    const ownersInGuild = OWNER_IDS.map(id =>
+    const ownersInGuild = ace.getOwnerIds().map(id =>
         guild.members.cache.get(id)
     ).filter(Boolean);
 
@@ -79,7 +73,7 @@ export async function guildAllowed(guild: any): Promise<boolean> {
      * before allowing the bot to operate.
      */
     const hasAdminOwner = ownersInGuild.some((member: any) =>
-        member.permissions?.has(PermissionsBitField.Flags.Administrator)
+        member.permissions?.has(dis.PermissionsBitField.Flags.Administrator)
     );
 
     return hasAdminOwner;
@@ -97,46 +91,36 @@ export async function guildAllowed(guild: any): Promise<boolean> {
  * - prefix commands (message)
  */
 export function getPermissionLevel(
-    interaction?: Context.AnyInteraction,
-    message?: Message
+    interaction?: ace.AnyInteraction,
+    message?: dis.Message
 ): number {
 
     /**
      * Resolve user object from either interaction or message
      */
     const user = interaction?.user ?? message?.author;
+    const userId = user?.id;
 
-    /**
-     * Resolve guild member safely
-     * (explicit narrowing to avoid TS union hell)
-     */
-    const member: GuildMember | null =
-    (interaction?.member as GuildMember | null)
+    // Owner check
+    if (userId && ace.getOwnerIds().includes(userId)) return 3;
+
+
+    // resolve guild member
+    const member =
+    (interaction?.member as dis.GuildMember)
     ?? message?.member
     ?? null;
 
-    if (!user || !member) return 0;
+    if (!member) return 0;
 
-    const userId = user.id;
 
-    // =========================
-    // OWNER LEVEL
-    // =========================
-    if (OWNER_IDS.includes(userId)) return 3;
+    // Admin check
+    if (member.permissions.has(dis.PermissionsBitField.Flags.Administrator)) return 2;
 
-    // =========================
-    // ADMIN LEVEL
-    // =========================
-    if (member.permissions.has(PermissionsBitField.Flags.Administrator)) return 2;
+    // Mod check
+    if (member.permissions.has(dis.PermissionsBitField.Flags.KickMembers) && member.permissions.has(dis.PermissionsBitField.Flags.ManageMessages)) return 1;
 
-    // =========================
-    // MOD LEVEL
-    // =========================
-    if (member.permissions.has(PermissionsBitField.Flags.KickMembers) && member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return 1;
-
-    // =========================
-    // DEFAULT PUBLIC LEVEL
-    // =========================
+    // default Public level
     return 0;
 }
 
@@ -155,9 +139,9 @@ export function getPermissionLevel(
  * which abstracts role / hierarchy logic away from this function.
  */
 export function canRun(
-    interaction?: Context.AnyInteraction,
-    message?: Message,
-    command?: Command
+    interaction?: ace.AnyInteraction,
+    message?: dis.Message,
+    command?: ace.Command
 ): boolean {
 
     /**

@@ -1,11 +1,8 @@
-import * as Discord from 'discord.js'
+import * as dis from 'discord.js';
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
-import { PermissionLevel } from "../../../framework/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-import { media } from "../../../framework/embed/media.js";
-import { Colors } from "../../../config/theme.js";
-
-const command: Command = {
+const command: ace.Command = {
 
     /**
      * use this if you dont want the command to be prefix enabled.
@@ -25,7 +22,7 @@ const command: Command = {
      * use this if the required permission level
      * for this command is anything higher than 'PUBLIC'
      */
-    requiredLevel: PermissionLevel.PUBLIC,
+    requiredLevel: ace.PermissionLevel.PUBLIC,
 
     /**
      * only really matters if the command has options/args
@@ -51,7 +48,7 @@ const command: Command = {
         `.trim()
     },
 
-    data: new Discord.SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
         .setName('serverinfo')
         .setDescription('some description')
 
@@ -107,23 +104,23 @@ const command: Command = {
 
         // CHANNEL STATS
         const textChannels = guild.channels.cache.filter(
-            c => c.type === Discord.ChannelType.GuildText
+            c => c.type === dis.ChannelType.GuildText
         ).size;
 
         const voiceChannels = guild.channels.cache.filter(
-            c => c.type === Discord.ChannelType.GuildVoice
+            c => c.type === dis.ChannelType.GuildVoice
         ).size;
 
         const stageChannels = guild.channels.cache.filter(
-            c => c.type === Discord.ChannelType.GuildStageVoice
+            c => c.type === dis.ChannelType.GuildStageVoice
         ).size;
 
         const forumChannels = guild.channels.cache.filter(
-            c => c.type === Discord.ChannelType.GuildForum
+            c => c.type === dis.ChannelType.GuildForum
         ).size;
 
         const categoryChannels = guild.channels.cache.filter(
-            c => c.type === Discord.ChannelType.GuildCategory
+            c => c.type === dis.ChannelType.GuildCategory
         ).size;
 
         const threadChannels = guild.channels.cache.filter(
@@ -290,11 +287,11 @@ const command: Command = {
             /**
              * MEDIA
              */
-            thumbnail: media.guild(),
+            thumbnail: ace.media.guild(),
             image: guild.banner
-            ? media.guild('banner')
+            ? ace.media.guild('banner')
             : undefined,
-            footerIcon: media.local("branding")
+            footerIcon: ace.media.local("branding")
         });
 
     }

@@ -19,7 +19,7 @@ import { pathToFileURL } from "url";
 import { Collection } from "discord.js";
 
 import * as Utils from '@utils';
-import * as Ace from '@framework';
+import * as ace from '@framework';
 
 /**
  * Initializes the command system.
@@ -67,7 +67,7 @@ export async function loadCommands() {
          */
         if (command.autocomplete) {
 
-            Ace.registerAutocomplete({
+            ace.registerAutocomplete({
                 command: command.data.name,
                 execute: command.autocomplete
             });

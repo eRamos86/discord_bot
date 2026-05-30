@@ -1,9 +1,6 @@
-import * as Discord from 'discord.js';
-
-import { PermissionLevel } from "../../../framework/guards/guards.js";
-import { Command } from '../../../types/command.types.js';
-import { media } from "../../../framework/embed/media.js";
-import { Colors } from "../../../config/theme.js";
+import * as dis from 'discord.js';
+import * as ace from '@framework';
+import * as Utils from '@utils';
 
 /**
  * HELP COMMAND
@@ -23,7 +20,7 @@ import { Colors } from "../../../config/theme.js";
  * so it may be slower than other commands. Caching can be implemented if needed.
  * 
  */
-const command: Command = {
+const command: ace.Command = {
 
     prefix: {
         enabled: true,
@@ -31,7 +28,7 @@ const command: Command = {
     },
 
     aliases: [],
-    requiredLevel: PermissionLevel.PUBLIC,
+    requiredLevel: ace.PermissionLevel.PUBLIC,
 
     help: {
         usage: "`/help` *`[category]`* *`[subcategory]`* *`[command]`*",
@@ -45,8 +42,9 @@ const command: Command = {
 
     autocomplete: async (interaction) => {
 
-        const { getAllCommands } = await import('../../../features/help/index.js');
+        const { getAllCommands } = await import('@features/help/index.js');
         const all = await getAllCommands();
+
         const focused = interaction.options.getFocused(true);
         const value = focused.value.toLowerCase();
 
@@ -93,7 +91,7 @@ const command: Command = {
 
     },
 
-    data: new Discord.SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
 
     .setName('help')
     .setDescription('Shows the help menu')
@@ -123,78 +121,47 @@ const command: Command = {
     async execute(ctx) {
 
         // GATHER DATA
-        const {getAllCommands, renderHelpView} = await import('../../../features/help/index.js');
-        const all = await getAllCommands();
+        const {
+            getAllCommands,
+            renderHelpView,
+            resolveHelpTarget
+        } = await import('@features/help/index.js');
 
-        let category: string | undefined;
-        let subcategory: string | undefined;
-        let command: string | undefined;
+        const all = await getAllCommands();
+        const target = resolveHelpTarget(ctx.args, all);
 
         // LOGIC
-        /**
-         * SLASH COMMANDS
-         */
-        if (ctx.interaction?.isChatInputCommand()) {
+        if (target.error === 'INVALID_COMMAND') {return ctx.error({
+            embed: {
+                title: 'Command not found',
+                desc: `No command name \`${ctx.args.raw?.[0]}\` was found.`
+            },
+            flags: dis.MessageFlags.Ephemeral
+        });}
 
-            category = ctx.getString("category") ?? undefined;
-            subcategory = ctx.getString("subcategory") ?? undefined;
-            command = ctx.getString("command") ?? undefined;
+        if (target.error === 'INVALID_SUBCATEGORY') {return ctx.error({
+            embed: {
+                title: 'Invalid subcategory',
+                desc: [
+                    'Subcategories must be used with their category.',
+                    '',
+                    'Example:',
+                    '`help utility general`'
+                ].join('\n')
+            },
+            flags: dis.MessageFlags.Ephemeral
+        });}
 
-        }
-
-        /**
-         * PREFIX COMMANDS
-         */
-        else {
-
-            const raw = ctx.args.raw ?? [];
-            const first = raw[0]?.toLowerCase();
-            const second = raw[1]?.toLowerCase();
-
-            /**
-             * NO ARGS
-             * ---help
-             */
-            if (!first) {
-
-                // main menu
-
-            }
-
-            /**
-             * COMMAND MATCH
-             * ---help ping
-             */
-            else if (all.some(c => c.name.toLowerCase() === first)) command = first;
-
-            /**
-             * CATEGORY MATCH
-             * ---help utility
-             */
-            else if (all.some(c => c.category.toLowerCase() === first)) {
-
-                category = first;
-
-                /**
-                 * SUBCATEGORY MATCH
-                 * ---help utility general
-                 */
-                if (second && all.some(c =>
-                        c.category.toLowerCase() === first &&
-                        c.subcategory.toLowerCase() === second
-                    )) subcategory = second;
-
-            }
-
-        }
-
-        return renderHelpView(ctx, {
-            category,
-            subcategory,
-            command
-        });
+        if (target.error === 'INVALID_CATEGORY') {return ctx.error({
+            embed: {
+                title: 'Category not found',
+                desc: `No category named \`${ctx.args.raw?.[0]}\` was found.`
+            },
+            flags: dis.MessageFlags.Ephemeral
+        });}
 
         // BUILD REPLY
+        return renderHelpView(ctx, target);
 
     }
 

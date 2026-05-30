@@ -26,10 +26,8 @@ export default {
      */
     execute(client: any) {
         console.log(
-            `\n=================================================================\n` +
             `\nLooks like Client is ready!\n` +
-            `Logged in as ${client.user.tag}\n\n` +
-            `=================================================================\n\n`
+            `Logged in as ${client.user.tag}\n`
         );
     }
 };

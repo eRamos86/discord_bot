@@ -1,13 +1,8 @@
-import {
-    SlashCommandBuilder,
-    ChatInputCommandInteraction,
-    Client
-} from "discord.js";
-
+import * as dis from 'discord.js';
 import * as ace from '@framework';
 import * as Utils from '@utils';
 
-const command: Command = {
+const command: ace.Command = {
 
     prefix: {
         enabled: true,
@@ -16,7 +11,7 @@ const command: Command = {
 
     aliases: [],
 
-    requiredLevel: PermissionLevel.PUBLIC,
+    requiredLevel: ace.PermissionLevel.PUBLIC,
 
     help: {
         usage: '`/ping`',
@@ -25,7 +20,7 @@ const command: Command = {
         `.trim()
     },
 
-    data: new SlashCommandBuilder()
+    data: new dis.SlashCommandBuilder()
     .setName('ping')
     .setDescription('Replies with pong. Used to test Bot connectivity.'),
 

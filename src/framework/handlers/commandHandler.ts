@@ -39,35 +39,12 @@ export async function handleCommand(
     message?: Message
 ) {
 
-    // Prevent unauthorized command execution
-    if (!canRun(interaction, message, command)) {
-        return interaction
-            ? interaction.reply({
-                content: "You don't have permission to use this command.",
-                flags: 64
-            })
-            : message?.reply(
-                "You don't have permission to use this command."
-            );
-    }
-
     // Debug: track command execution
     console.log(`Running command: ${command.data.name}`);
 
-    
-    let normalizedArgs = args;
-
     // Normalize prefix command arguments into structured format
+    let normalizedArgs = args;
     if (!interaction && message) {
-
-        /*
-        normalizedArgs = await parsePrefixArgs(
-            command,
-            args.raw ?? [],
-            client,
-            message.guild
-        );
-        */
        
         normalizedArgs = {
 
@@ -83,6 +60,7 @@ export async function handleCommand(
         };
 
     }
+    
 
     // Extract options from slash command interaction
     else if (interaction?.isChatInputCommand()) {
@@ -99,6 +77,15 @@ export async function handleCommand(
         client,
         args: normalizedArgs
     });
+
+    // Prevent unauthorized command execution
+    if (!canRun(interaction, message, command)) {
+        return ctx.warn({
+            embed: {
+                title: `You don't have permission to use this command.`
+            }
+        });
+    }
 
     // Execute resolved command handler with unified context
     return command.execute(ctx);
@@ -130,7 +117,8 @@ export async function parsePrefixArgs(
      * Starts as a direct reference to raw input,
      * then gets progressively replaced with typed values.
      */
-    const parsed: Types.ParsedArgs = raw;
+    const parsed: Types.ParsedArgs = {};
+    parsed.raw = [...raw];
 
     /**
      * Command option definitions (from slash command builder).
@@ -145,6 +133,10 @@ export async function parsePrefixArgs(
         const value = raw[i];
 
         if (!value) continue;
+
+        for (const option of command.data.options) {
+            console.log(option.name, option.type);
+        }
 
         switch (option.type) {
 

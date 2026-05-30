@@ -15,9 +15,9 @@ export const Colors = {
 
     primary: "#5865F2", // blurple
     success: "#57F287",
-    danger: "#ED4245",
+    error: "#ED4245",
+    warning: "#ffa51d",
+    danger: "#960000",
     neutral: "#2B2D31",
-    error: "#960000",
-    warning: "#c07d19"
 
 } satisfies Record<string, ColorResolvable>;
