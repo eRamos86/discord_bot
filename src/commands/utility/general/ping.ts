@@ -35,6 +35,8 @@ const command: ace.Command = {
         const responseLatency = Math.round(performance.now() - start);
         const latency = Date.now() - ctx.createdTimestamp;
 
+        console.log('executing png comand');
+
         ctx.success({
             embed: {
                 title: 'Pong!',

@@ -320,6 +320,42 @@ testing and system upkeep tools
 
 
 
+- alright i wanna make it so the bot is configurable to each server its in. maybe server owners wanna change the prefix, certain features will have configurations (like welcome and goodbye messages), toggle features (like the leveling system or economy or pets, those cant be configed by server its all hardcoded but the role names and colors for the levels can be changed)
+
+
+
+- i also wanna add a rich presence thing with a config where i can change, add, and remove presences that the bot loops.
+
+
+
+- i wanna start working on the welcome messages and goodbye messages, which can be configged per server (defaults to toggle off). config the channel, message, title, image, color, footer, etc.
+
+
+
+- then i wanna start working on message logging, a feature that can be toggled per server (defaults to off) and when enabled config the channel.
+
+feature will log all messages and edits and deletions
+
+oh wait maybe its a good idea to config what gets logged in the channel.. maybe users dont want every message logged but wanna log deletions and edits!
+
+
+#
+1. GuildSettings model [done!]
+2. getGuildSettings() [done!]
+3. Per-server prefix [done!]
+4. /config command
+5. Welcome messages
+6. Goodbye messages
+7. Logging system
+8. Presence rotation
+9. Level role configuration
+10. Economy config
+11. Pets config
+
+#
+
+
+
 - make sure CommandContext has everythigng i'd need fr later commands. i never have to defferentiate between interaction vs message.
 - ADD CACHING FOR HELP COMMAND
 

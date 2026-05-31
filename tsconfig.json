@@ -17,24 +17,27 @@
     "paths": {
       "@config": ["config/index.ts"],
       "@config/*": ["config/*"],
-      
+
       "@framework": ["framework/index.ts"],
       "@framework/*": ["framework/*"],
-      
+
       "@events": ["events/index.ts"],
       "@events/*": ["events/*"],
-      
+
       "@features": ["features/index.ts"],
       "@features/*": ["features/*"],
-      
+
       "@types": ["types/index.ts"],
       "@types/*": ["types/*"],
-      
+
       "@ui": ["ui/index.ts"],
       "@ui/*": ["ui/*"],
-      
+
       "@utils": ["utils/index.ts"],
       "@utils/*": ["utils/*"],
+
+      "@db": ["database/index.ts"],
+      "@db/*": ["database/*"],
     }
   },
 

@@ -37,6 +37,7 @@ dotenv.config();
      * Loads all commands from the command directory and attaches
      * them to the client for runtime access
      */
+    console.log('loading commands...');
     (client as ace.BotClient).commands = await ace.loadCommands();
 
 //#endregion
@@ -53,50 +54,9 @@ dotenv.config();
 
 //#region EVENT LOADING
 
-    /**
-     * Dynamicall loads all event handlers from the events directory.
-     * 
-     * supports both:
-     * - .ts
-     * - .js
-     * 
-     * Each event file must export:
-     * - name: Discord event name
-     * - execute: handler function
-     * - once?: whether to use client.once instead of client.on
-     */
+    
     //MAKE THIS A LOADER IN CORE/LOADERS
-
-    const eventsPath = path.join(__dirname, "events");
-
-    const eventFiles = fs
-        .readdirSync(eventsPath)
-        .filter(file => file.endsWith(".ts") || file.endsWith(".js"));
-
-    for (const file of eventFiles) {
-
-        const filePath = path.join(eventsPath, file);
-        const event = await import(url.pathToFileURL(filePath).href);
-
-        const eventName = event.default.name;
-        const execute = event.default.execute;
-
-        if (!eventName || !execute) {
-            console.warn(`Invalid event file: ${file}`);
-            continue;
-        }
-
-        // Automatically bind client to all events
-        if (event.default.once) {
-            client.once(eventName, (...args) =>
-                execute(...args, client)
-            );
-        } else {
-            client.on(eventName, (...args) =>
-                execute(...args, client)
-            );
-        }
-    }
+    ace.loadEvents(client);
 
 //#endregion
 

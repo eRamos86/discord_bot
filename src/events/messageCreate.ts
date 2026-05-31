@@ -12,7 +12,9 @@ export default {
             `Message Created in '${message.guild.name}' by '${message.author.tag}': "${message.content}"`
         );
 
-        const prefix = ace.botConfig.prefix;
+        const settings = await ace.getGuildSettings(message.guild.id);
+
+        const prefix = settings.prefix;
         const mentionPrefix = `<@${client.user?.id}>`;
 
         const usedPrefix = message.content.startsWith(prefix)
@@ -67,6 +69,7 @@ export default {
             });
         }
 
+        console.log('routing command');
         return ace.routeCommand({
             client,
             message,

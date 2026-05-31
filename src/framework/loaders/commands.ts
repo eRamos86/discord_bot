@@ -39,6 +39,7 @@ export async function loadCommands() {
     );
 
     const commandFiles = Utils.getCommandFiles(commandsPath);
+    console.log(commandFiles);
 
     for (const file of commandFiles) {
 

@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 
 import { pathToFileURL } from 'url';
+import * as Utils from '@utils';
 
 /**
  * Recursively collects all command file paths.
@@ -16,35 +17,11 @@ import { pathToFileURL } from 'url';
  */
 export function getCommandFiles(dir: string): string[] {
 
+    console.log('GETCOMMAND FILES FUNTION')
     const results: string[] = [];
+    results.push(...Utils.walk(dir));
 
-    function walk(current: string) {
-
-        const entries = fs.readdirSync(current, {
-            withFileTypes: true
-        });
-
-        for (const entry of entries) {
-
-            const fullPath = path.join(current, entry.name);
-
-            if (entry.isDirectory()) {
-                walk(fullPath);
-                continue;
-            }
-
-            if (
-                entry.name.endsWith(".ts") ||
-                entry.name.endsWith(".js")
-            ) {
-                results.push(fullPath);
-            }
-
-        }
-
-    }
-
-    walk(dir);
+    console.log('results:', results.length);
 
     return results;
 
