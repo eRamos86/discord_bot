@@ -4,9 +4,7 @@ import * as Utils from '@utils';
 
 /**
  * /config
- * shows a mini help menu. not as detailed as the help defined below
- * but just enough to give the user an idea of how to work it.
- * can reference 'do /help config to learn more' in the footer or something
+ * shows a full help menu for the config system.
  *
  * /config show
  * shows all the server's config options
@@ -35,7 +33,8 @@ const command: ace.Command = {
 
     async execute(ctx) {
 
-        // basic error handling then route to @features/config/index.ts
+        console.log('hello from config command');
+        return ace.handleConfigCommand(ctx);
 
     }
 

@@ -1,4 +1,7 @@
-import { GuildSettings } from '@db';
+import {
+    GuildSettings,
+    guildSettingsProvider
+} from '@db';
 
 export function createDefaultGuildSettings(guildId: string): GuildSettings {
 
@@ -45,4 +48,12 @@ export function createDefaultGuildSettings(guildId: string): GuildSettings {
 
     };
 
+}
+
+export async function getGuildSettings(guildId: string) {
+    return guildSettingsProvider.get(guildId);
+}
+
+export async function updateGuildSettings(settings: GuildSettings) {
+    await guildSettingsProvider.update(settings);
 }

@@ -1,3 +1,4 @@
+
 export interface GuildSettings {
 
     guildId: string;
@@ -40,3 +41,14 @@ export interface GuildSettings {
     };
 
 }
+
+
+export interface GuildSettingsProvider {
+
+    get(guildId: string): Promise<GuildSettings>;
+
+    update(settings: GuildSettings): Promise<void>;
+
+    delete?(guildId: string): Promise<void>;
+
+};
