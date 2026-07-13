@@ -25,7 +25,7 @@ export async function loadEvents(client: dis.Client) {
         const eventName = event.name;
         const execute = event.execute;
 
-        if (eventName === 'interactionCreate') continue;
+        //if (eventName === 'interactionCreate') continue;
 
         if (!eventName || !execute) {
             console.warn(`Invalid event file: ${file}`);

@@ -148,7 +148,7 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
             if (name !== target) continue;
 
             await rest.post(Routes.applicationGuildCommands(
-                process.env.CLIENT_ID!,
+                process.env.DISCORD_TOKEN!,
                 process.env.DEV_GUILD!
             ), {body: command.data.toJSON()});
 

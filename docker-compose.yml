@@ -1,0 +1,37 @@
+services:
+  discord_bot:
+    image: ghcr.io/eramos86/discord_bot:latest
+    container_name: discord_bot
+    restart: always
+    env_file:
+      - /home/ace/.env.discord_bot
+    environment:
+      - NODE_ENV=production
+    networks:
+      - discord_bot_network
+    healthcheck:
+      test: ["CMD", "node", "dist/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ace/.docker/config.json:/config.json
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: --label-enable --cleanup --interval 300 discord_bot
+    networks:
+      - discord_bot_network
+
+networks:
+  discord_bot_network:
+    driver: bridge

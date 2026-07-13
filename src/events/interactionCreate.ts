@@ -17,7 +17,7 @@ export default {
 
     name: "interactionCreate",
 
-    async execute(interaction: any, client: any) {
+    async execute(interaction: any, client: ace.BotClient) {
 
         /**
          * Ignore direct messages (bot only supports guild interactions)
