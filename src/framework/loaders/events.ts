@@ -7,11 +7,13 @@ import * as Utils from '@utils';
 
 export async function loadEvents(client: dis.Client) {
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = isProd ? 'dist' : 'src';
+    
     const eventsPath = path.join(
         process.cwd(),
-        'src',
+        basePath,
         'events'
-
     );
     console.log(`Loading events from ${eventsPath}`);
 
@@ -36,10 +38,9 @@ export async function loadEvents(client: dis.Client) {
         if (event.once) {
             client.once(eventName, (...args) => execute(...args, client));
         } else {
-            client.on(eventName, (...args) => execute(...args, client));
+            client.on(eventName, (...args) => execute(...args, client))
         }
         console.log(`Loaded event: ${eventName}`);
-
 
     }
 

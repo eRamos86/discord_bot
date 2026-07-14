@@ -32,9 +32,12 @@ import * as ace from '@framework';
 export async function loadCommands() {
     const commands = new Collection<string, any>();
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = isProd ? 'dist' : 'src';
+    
     const commandsPath = path.join(
         process.cwd(),
-        "src",
+        basePath,
         "commands"
     );
 
