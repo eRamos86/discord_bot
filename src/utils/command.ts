@@ -50,7 +50,31 @@ export type DeployOptions = {
 export async function deploy(options: DeployOptions = {}): Promise<DeployResult> {
 
     const started = Date.now();
-    const rest = new REST({version: '10'}).setToken(process.env.DISCORD_TOKEN!);
+    const token = process.env.DISCORD_TOKEN ?? process.env.TOKEN;
+    const clientId = process.env.CLIENT_ID;
+    const guildId = process.env.DEV_GUILD;
+
+    const deployed: string[] = [];
+    const skipped: string[] = [];
+    const errors: string[] = [];
+
+    if (!token) errors.push('Missing DISCORD_TOKEN or TOKEN environment variable.');
+    if (!clientId) errors.push('Missing CLIENT_ID environment variable.');
+    if (!guildId) errors.push('Missing DEV_GUILD environment variable.');
+
+    if (errors.length) {
+        return {
+            success: false,
+            mode: options.commandName ? 'single' : 'all',
+            deployed,
+            skipped,
+            errors,
+            duration: Date.now() - started
+        };
+    }
+
+    // The required values were validated above.
+    const rest = new REST({version: '10'}).setToken(token!);
     const commandsPath = path.join(
         process.cwd(),
         'src',
@@ -58,10 +82,6 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
     );
 
     const files = getCommandFiles(commandsPath);
-
-    const deployed: string[] = [];
-    const skipped: string[] = [];
-    const errors: string[] = [];
 
     const target = options.commandName?.toLowerCase();
 
@@ -99,8 +119,8 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
         try {
 
             await rest.put(Routes.applicationGuildCommands(
-                process.env.CLIENT_ID!,
-                process.env.DEV_GUILD!
+                clientId!,
+                guildId!
             ), {body});
 
             return {
@@ -148,8 +168,8 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
             if (name !== target) continue;
 
             await rest.post(Routes.applicationGuildCommands(
-                process.env.DISCORD_TOKEN!,
-                process.env.DEV_GUILD!
+                clientId!,
+                guildId!
             ), {body: command.data.toJSON()});
 
             deployed.push(command.data.name);
