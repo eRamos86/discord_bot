@@ -1,8 +1,12 @@
 services:
   discord_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
     image: ghcr.io/eramos86/discord_bot:latest
     container_name: discord_bot
-    restart: always
+    restart: unless-stopped
     env_file:
       - /home/ace/.env.discord_bot
     environment:
@@ -19,7 +23,7 @@ services:
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
-    restart: always
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/ace/.docker/config.json:/config.json

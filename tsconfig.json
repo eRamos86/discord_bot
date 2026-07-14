@@ -16,6 +16,11 @@
     "paths": {
       "@config": ["src/config/index.ts"],
       "@config/*": ["src/config/*"],
+      "@config/env": ["src/config/env.ts"],
+      "@config/botConfig": ["src/config/botConfig.ts"],
+      "@config/owners": ["src/config/owners.ts"],
+      "@config/theme": ["src/config/theme.ts"],
+      "@config/presences": ["src/config/presences.ts"],
 
       "@framework": ["src/framework/index.ts"],
       "@framework/*": ["src/framework/*"],
