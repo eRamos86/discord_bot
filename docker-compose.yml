@@ -5,14 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: discord_bot
     restart: always
-    environment:
-      - TOKEN=${TOKEN}
-      - OWNER_1=${OWNER_1}
-      - OWNER_2=${OWNER_2}
-      - OWNER_3=${OWNER_3}
-      - DEV_GUILD=${DEV_GUILD}
-      - CLIENT_ID=${CLIENT_ID}
-      - NODE_ENV=${NODE_ENV}
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "node", "dist/healthcheck.js"]
       interval: 30s
