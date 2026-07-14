@@ -11,32 +11,32 @@
 
     "rootDir": "./src",
     "outDir": "./dist",
+    "baseUrl": ".",
 
-    "baseUrl": "./src",
     "paths": {
-      "@config": ["config/index.ts"],
-      "@config/*": ["config/*"],
+      "@config": ["src/config/index.ts"],
+      "@config/*": ["src/config/*"],
 
-      "@framework": ["framework/index.ts"],
-      "@framework/*": ["framework/*"],
+      "@framework": ["src/framework/index.ts"],
+      "@framework/*": ["src/framework/*"],
 
-      "@events": ["events/index.ts"],
-      "@events/*": ["events/*"],
+      "@events": ["src/events/index.ts"],
+      "@events/*": ["src/events/*"],
 
-      "@features": ["features/index.ts"],
-      "@features/*": ["features/*"],
+      "@features": ["src/features/index.ts"],
+      "@features/*": ["src/features/*"],
 
-      "@types": ["types/index.ts"],
-      "@types/*": ["types/*"],
+      "@types": ["src/types/index.ts"],
+      "@types/*": ["src/types/*"],
 
-      "@ui": ["ui/index.ts"],
-      "@ui/*": ["ui/*"],
+      "@ui": ["src/ui/index.ts"],
+      "@ui/*": ["src/ui/*"],
 
-      "@utils": ["utils/index.ts"],
-      "@utils/*": ["utils/*"],
+      "@utils": ["src/utils/index.ts"],
+      "@utils/*": ["src/utils/*"],
 
-      "@db": ["database/index.ts"],
-      "@db/*": ["database/*"],
+      "@db": ["src/database/index.ts"],
+      "@db/*": ["src/database/*"]
     }
   },
 

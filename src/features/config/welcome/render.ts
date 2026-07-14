@@ -37,9 +37,10 @@ export async function renderWelcomeConfig(
         footerIcon: ace.media.local('branding'),
 
         components: [
-            welcomeButtons(
-                settings.welcome.enabled
-            ),
+            // TODO: implement welcomeButtons component
+            // welcomeButtons(
+            //     settings.welcome.enabled
+            // ),
         ],
 
         flags: dis.MessageFlags.Ephemeral
