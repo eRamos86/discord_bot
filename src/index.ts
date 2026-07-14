@@ -94,10 +94,12 @@ dotenv.config();
 
 //#endregion
 
-/**
+/** 
  * BOT LOGIN
  * 
  * Logs the bot into Discord using the provided token
  * from environment variables.
  */
-client.login(client.token!);
+import { ENV } from '@config/env';
+
+client.login(ENV.TOKEN);

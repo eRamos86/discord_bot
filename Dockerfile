@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install all dependencies (including devDependencies for build)
 RUN npm ci
 
 # Copy source code
@@ -14,6 +14,9 @@ COPY . .
 
 # Build TypeScript
 RUN npm run build
+
+# Rewrite path aliases in compiled output
+RUN npx tsc-alias
 
 # Production stage
 FROM node:22-alpine AS runner
@@ -26,7 +29,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 discordbot
 
-# Copy built assets from builder
+# Copy built assets from builder (with rewritten imports)
 COPY --from=builder --chown=discordbot:nodejs /app/dist ./dist
 COPY --from=builder --chown=discordbot:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=discordbot:nodejs /app/package.json ./package.json
