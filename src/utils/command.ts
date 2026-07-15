@@ -53,6 +53,8 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
     const token = process.env.DISCORD_TOKEN ?? process.env.TOKEN;
     const clientId = process.env.CLIENT_ID;
     const guildId = process.env.DEV_GUILD;
+    // Global deployment mode - set GLOBAL_DEPLOY=true in env for production
+    const isGlobalDeploy = process.env.GLOBAL_DEPLOY === 'true';
 
     const deployed: string[] = [];
     const skipped: string[] = [];
@@ -60,7 +62,8 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
 
     if (!token) errors.push('Missing DISCORD_TOKEN or TOKEN environment variable.');
     if (!clientId) errors.push('Missing CLIENT_ID environment variable.');
-    if (!guildId) errors.push('Missing DEV_GUILD environment variable.');
+    // guildId only required for guild-specific deployment
+    if (!isGlobalDeploy && !guildId) errors.push('Missing DEV_GUILD environment variable.');
 
     if (errors.length) {
         return {
@@ -84,6 +87,11 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
     const files = getCommandFiles(commandsPath);
 
     const target = options.commandName?.toLowerCase();
+
+    // Determine the route based on deployment mode
+    const deployRoute = isGlobalDeploy 
+        ? Routes.applicationCommands(clientId!)
+        : Routes.applicationGuildCommands(clientId!, guildId!);
 
     /**
      * FULL DEPLOY
@@ -118,10 +126,7 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
 
         try {
 
-            await rest.put(Routes.applicationGuildCommands(
-                clientId!,
-                guildId!
-            ), {body});
+            await rest.put(deployRoute, {body});
 
             return {
                 success: true,
@@ -167,10 +172,7 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
 
             if (name !== target) continue;
 
-            await rest.post(Routes.applicationGuildCommands(
-                clientId!,
-                guildId!
-            ), {body: command.data.toJSON()});
+            await rest.post(deployRoute, {body: command.data.toJSON()});
 
             deployed.push(command.data.name);
 
