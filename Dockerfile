@@ -31,7 +31,6 @@ RUN adduser --system --uid 1001 discordbot
 
 # Copy built assets from builder (with rewritten imports)
 COPY --from=builder --chown=discordbot:nodejs /app/dist ./dist
-COPY --from=builder --chown=discordbot:nodejs /app/src ./src
 COPY --from=builder --chown=discordbot:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=discordbot:nodejs /app/package.json ./package.json
 
