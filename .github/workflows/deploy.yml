@@ -35,6 +35,7 @@ jobs:
               git clean -fd
               git checkout -f main
               echo 'TOKEN=${{ secrets.DISCORD_TOKEN }}' > .env
+              echo 'DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}' >> .env
               echo 'OWNER_1=490178836202258437' >> .env
               echo 'OWNER_2=' >> .env
               echo 'OWNER_3=' >> .env
