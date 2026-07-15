@@ -6,22 +6,56 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Connect to Tailnet (auth key)
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/discord_bot
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Connect to Tailnet
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
       - name: Deploy to poopmachine
         run: |
-          # Write SSH key
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Deploy
           ssh \
             -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=no \
@@ -29,7 +63,7 @@ jobs:
             ace@100.119.115.13 \
             "
               set -e
-              cd ~/platform/DiscordBot
+              cd ~/platform/discord_bot
               git fetch origin main
               git reset --hard origin/main
               git clean -fd
@@ -41,7 +75,9 @@ jobs:
               echo 'DEV_GUILD=849749391619129374' >> .env
               echo 'CLIENT_ID=848351790345093180' >> .env
               echo 'NODE_ENV=production' >> .env
-              docker compose up -d --build
+              echo 'GLOBAL_DEPLOY=true' >> .env
+              docker compose pull discord_bot
+              docker compose up -d discord_bot
               sleep 5
               docker compose logs discord_bot --tail 20
             "
