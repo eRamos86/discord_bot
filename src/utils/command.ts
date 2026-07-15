@@ -75,11 +75,11 @@ export async function deploy(options: DeployOptions = {}): Promise<DeployResult>
 
     // The required values were validated above.
     const rest = new REST({version: '10'}).setToken(token!);
-    const commandsPath = path.join(
-        process.cwd(),
-        'src',
-        'commands'
-    );
+    
+    // Use dist/ in production (Docker), src/ in development
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = isProd ? 'dist' : 'src';
+    const commandsPath = path.join(process.cwd(), basePath, 'commands');
 
     const files = getCommandFiles(commandsPath);
 

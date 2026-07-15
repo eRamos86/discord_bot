@@ -1,9 +1,23 @@
 import dotenv from 'dotenv';
-import * as Utils from '@utils';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-const result = await Utils.deploy();
+// Use relative path in production (Docker/dist), tsconfig paths in development
+const isProd = process.env.NODE_ENV === 'production';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// In production (Docker), use relative path to built utils/command.js
+// In development, use relative path to src/utils/command.ts
+const utilsPath = isProd
+  ? path.join(__dirname, 'utils', 'command.js')
+  : path.join(__dirname, 'utils', 'command.ts');
+
+const { deploy } = await import(utilsPath);
+
+const result = await deploy();
 
 if (!result.success) {
 
