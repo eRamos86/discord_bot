@@ -11,9 +11,10 @@ import type * as Types from '../../types/index.js';
  */
 export async function getAllCommands(): Promise<Types.LoadedCommand[]> {
 
+    const isProd = process.env.NODE_ENV === 'production';
     const baseDir = path.join(
         process.cwd(),
-        'src',
+        isProd ? 'dist' : 'src',
         'commands'
     );
 
@@ -33,7 +34,7 @@ export async function getAllCommands(): Promise<Types.LoadedCommand[]> {
         const relativePath = path.relative(
             path.join(
                 process.cwd(),
-                'src',
+                isProd ? 'dist' : 'src',
                 'commands'
             ),
             file
