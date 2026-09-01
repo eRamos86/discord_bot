@@ -82,15 +82,13 @@ export async function handleConfigCommand(ctx: any) {
             set.applyWelcome(settings, key, value);
             break;
 
-        /*
-            case "goodbye":
+        case "goodbye":
             set.applyGoodbye(settings, key, value);
             break;
 
         case "logging":
             set.applyLogging(settings, key, value);
             break;
-        */
 
         default:
             return ctx.error(`Unknown config section: ${section}`);

@@ -148,11 +148,15 @@ export async function parsePrefixArgs(
              */
             case ApplicationCommandOptionType.String: {
 
-                // last string consumes rest of input
-                const remaining = raw.slice(i).join(" ");
-
-                parsed[option.name] = remaining;
-                return parsed;
+                if (i === options.length - 1) {
+                    // last string consumes rest of input
+                    const remaining = raw.slice(i).join(" ");
+                    parsed[option.name] = remaining;
+                    return parsed;
+                } else {
+                    parsed[option.name] = value;
+                    break;
+                }
 
             }
 

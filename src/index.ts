@@ -4,11 +4,39 @@ import fs from 'fs';
 import path from 'path';
 import * as ace from '@framework';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 
 // pre
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
+
+// Health check HTTP server for Docker healthchecks
+// This avoids creating new Discord WebSocket connections for health checks
+const HEALTH_PORT = process.env.HEALTH_PORT ? parseInt(process.env.HEALTH_PORT) : 3000;
+
+function startHealthServer() {
+    const server = createServer((req, res) => {
+        if (req.url === '/health' || req.url === '/healthz') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                status: 'ok', 
+                timestamp: new Date().toISOString(),
+                uptime: process.uptime(),
+                ready: client.isReady()
+            }));
+        } else {
+            res.writeHead(404);
+            res.end('Not Found');
+        }
+    });
+    
+    server.listen(HEALTH_PORT, '0.0.0.0', () => {
+        console.log(`Health check server listening on port ${HEALTH_PORT}`);
+    });
+    
+    return server;
+}
 
 //#region CLIENT INITIALIZATION
 
@@ -54,7 +82,6 @@ dotenv.config();
 
 //#region EVENT LOADING
 
-    
     //MAKE THIS A LOADER IN CORE/LOADERS
     ace.loadEvents(client);
 
@@ -94,12 +121,15 @@ dotenv.config();
 
 //#endregion
 
-/** 
+/**
  * BOT LOGIN
  * 
  * Logs the bot into Discord using the provided token
  * from environment variables.
  */
 import { ENV } from '@config/env';
+
+// Start health check server BEFORE logging in to Discord
+startHealthServer();
 
 client.login(ENV.TOKEN);

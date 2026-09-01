@@ -1,15 +1,12 @@
-export const presences = [
+import { ActivityType, PresenceData } from 'discord.js';
+
+export const presences: { type: ActivityType, text: string }[] = [
     {
-        type: 'playing',
+        type: ActivityType.Playing,
         text: 'a game',
     },
     {
-        type: 'watching',
+        type: ActivityType.Watching,
         text: 'rick and morty',
     },
 ];
-
-//type this so i can only select watching or playing or whatever discord offer.
-//then convert to discord code
-
-//place setInterval(rotatPresence, 30000); in on ready event

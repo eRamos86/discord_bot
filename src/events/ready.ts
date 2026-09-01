@@ -15,19 +15,31 @@
  * - initialization confirmation
  * - post-login diagnostics
  */
+import { presences } from '../config/presences.js';
+
+/**
+ * Executes when the client becomes ready.
+ *
+ * @param client Discord.js client instance (logged-in and initialized)
+ */
 export default {
     name: "clientReady",
     once: true,
 
-    /**
-     * Executes when the client becomes ready.
-     *
-     * @param client Discord.js client instance (logged-in and initialized)
-     */
     execute(client: any) {
         console.log(
             `\nLooks like Client is ready!\n` +
             `Logged in as ${client.user.tag}\n`
         );
+
+        let currentIndex = 0;
+        setInterval(() => {
+            const presence = presences[currentIndex];
+            client.user.setPresence({
+                activities: [{ name: presence.text, type: presence.type }],
+                status: 'online',
+            });
+            currentIndex = (currentIndex + 1) % presences.length;
+        }, 30000); // 30 seconds
     }
 };
