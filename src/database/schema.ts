@@ -54,4 +54,34 @@ export const guildSettings = pgTable('guild_settings', {
             deletions: true,
         },
     }),
+    automod: jsonb('automod').$type<{
+        enabled: boolean;
+        filters: {
+            profanity: boolean;
+            links: boolean;
+            invites: boolean;
+            spam: boolean;
+        };
+    }>().default({
+        enabled: false,
+        filters: {
+            profanity: false,
+            links: false,
+            invites: false,
+            spam: false,
+        },
+    }),
+});
+
+export const userEconomy = pgTable('user_economy', {
+    userId: text('user_id').primaryKey(),
+    balance: text('balance').default('0'), // store as string/numeric string or integer if preferred
+});
+
+export const tickets = pgTable('tickets', {
+    ticketId: text('ticket_id').primaryKey(),
+    guildId: text('guild_id').notNull(),
+    channelId: text('channel_id').notNull(),
+    authorId: text('author_id').notNull(),
+    status: text('status').default('open'),
 });
