@@ -1,47 +1,25 @@
-import * as dis from 'discord.js';
-import fs from 'fs';
-import path from 'path';
-import { pathToFileURL } from 'url';
-import * as ace from '@framework';
-import * as Utils from '@utils';
-
-export async function loadEvents(client: dis.Client) {
-
-    const isProd = process.env.NODE_ENV === 'production';
-    const basePath = isProd ? 'dist' : 'src';
-    
-    const eventsPath = path.join(
-        process.cwd(),
-        basePath,
-        'events'
-    );
-    console.log(`Loading events from ${eventsPath}`);
-
-    const eventFiles: string[] = Utils.walk(eventsPath)
-
-    for (const file of eventFiles) {
-
-        const ev = await import(pathToFileURL(file).href);
-        const event = ev.default;
-
-        const eventName = event.name;
-        const execute = event.execute;
-
-        //if (eventName === 'interactionCreate') continue;
-
-        if (!eventName || !execute) {
-            console.warn(`Invalid event file: ${file}`);
-            continue;
-        }
-
-        // Automatically bind client to all events
-        if (event.once) {
-            client.once(eventName, (...args) => execute(...args, client));
-        } else {
-            client.on(eventName, (...args) => execute(...args, client))
-        }
-        console.log(`Loaded event: ${eventName}`);
-
+import type { Client } from 'discord.js';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { walk } from '../../utils/fs.js';
+import { reportError } from '../runtime/errors.js';
+interface EventModule {
+    name: string;
+    once?: boolean;
+    execute: (...args: unknown[]) => unknown;
+}
+export async function loadEvents(client: Client) {
+    const dir = fileURLToPath(new URL('../../events', import.meta.url));
+    for (const file of walk(dir)) {
+        const imported = await import(pathToFileURL(file).href);
+        const event = imported.default as EventModule;
+        if (!event?.name || typeof event.execute !== 'function')
+            throw new Error(`Invalid event module: ${file}`);
+        const listener = (...args: unknown[]) => {
+            Promise.resolve()
+                .then(() => event.execute(...args, client))
+                .catch((error) => reportError(error, `event:${event.name}`));
+        };
+        if (event.once) client.once(event.name, listener);
+        else client.on(event.name, listener);
     }
-
 }

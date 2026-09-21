@@ -1,87 +1,75 @@
 import * as dis from 'discord.js';
 
-import * as ace from '@framework';
 import * as help from '@features/help/index.js';
+import * as ace from '@framework';
 import * as Utils from '../../utils/index.js';
 
 /**
  * Builds category menu.
  */
-function buildCategoryMenu(
-    categories: string[],
-    userId: string
-) {
-
+function buildCategoryMenu(categories: string[], userId: string) {
     const menu = new dis.StringSelectMenuBuilder()
 
-    .setCustomId(`help:category:${userId}`)
-    .setPlaceholder('select a category')
+        .setCustomId(`help:category:${userId}`)
+        .setPlaceholder('select a category')
 
-    .addOptions(categories.map(c => ({
-        label: Utils.titleCase(c),
-        value: c,
-        emoji: help.categoryIcons[c] || help.categoryIcons['default']
-    })));
+        .addOptions(
+            categories.map((c) => ({
+                label: Utils.titleCase(c),
+                value: c,
+                emoji: help.categoryIcons[c] || help.categoryIcons['default'],
+            })),
+        );
 
     return new dis.ActionRowBuilder<dis.StringSelectMenuBuilder>().addComponents(menu);
-
 }
 
 /**
  * Builds subcategory menu.
  */
-function buildSubcategoryMenu(
-    category: string,
-    subcategories: string[],
-    userId: string
-) {
-
+function buildSubcategoryMenu(category: string, subcategories: string[], userId: string) {
     const menu = new dis.StringSelectMenuBuilder()
-    .setCustomId(`help:subcategory:${category}:${userId}`)
-    .setPlaceholder('select a subcategory')
+        .setCustomId(`help:subcategory:${category}:${userId}`)
+        .setPlaceholder('select a subcategory')
 
-    .addOptions(subcategories.map(s => ({
-        label: Utils.titleCase(s),
-        value: s
-    })));
+        .addOptions(
+            subcategories.map((s) => ({
+                label: Utils.titleCase(s),
+                value: s,
+            })),
+        );
 
     return new dis.ActionRowBuilder<dis.StringSelectMenuBuilder>().addComponents(menu);
-
 }
 
 /**
  * Builds command manu.
  */
-function buildCommandMenu(
-    commands: ace.LoadedCommand[],
-    userId: string
-) {
-
-    const safe = commands.filter(c =>
-        c &&
-        typeof c.name === 'string' &&
-        typeof c.description === 'string'
-    ).slice(0, 25);
+function buildCommandMenu(commands: ace.LoadedCommand[], userId: string) {
+    const safe = commands
+        .filter((c) => c && typeof c.name === 'string' && typeof c.description === 'string')
+        .slice(0, 25);
 
     const first = safe[0];
 
     const menu = new dis.StringSelectMenuBuilder()
-    .setCustomId(`help:command:${first?.category}:${first?.subcategory}:${userId}`)
-    .setPlaceholder('select a command')
+        .setCustomId(`help:command:${first?.category}:${first?.subcategory}:${userId}`)
+        .setPlaceholder('select a command')
 
-    .addOptions(safe.map(c => ({
-        label: c.name,
-        value: c.name,
-        description: c.description.slice(0, 50)
-    })));
+        .addOptions(
+            safe.map((c) => ({
+                label: c.name,
+                value: c.name,
+                description: c.description.slice(0, 50),
+            })),
+        );
 
     return new dis.ActionRowBuilder<dis.StringSelectMenuBuilder>().addComponents(menu);
-
 }
 
 /**
  * Main help renderer.
- * 
+ *
  * Responsible ONLY for:
  * - Rendering help states
  * - rendering embeds
@@ -93,72 +81,63 @@ export async function renderHelpView(
         category?: string;
         subcategory?: string;
         command?: string;
-    }
+    },
 ) {
-
-    const {
-        category,
-        subcategory,
-        command
-    } = args;
+    const { category, subcategory, command } = args;
 
     // COMMAND VIEW
     if (command) {
-
         const all = await help.getAllCommands();
-        const cmd = all.find(c => c.name === command);
+        const cmd = all.find((c) => c.name === command);
 
-        if (!cmd) return ctx.error({
-            embed: {
-                title: "Command not found",
-                desc: `No command named \`${command}\` was found.`
-            },
-            flags: dis.MessageFlags.Ephemeral,
-        });
+        if (!cmd)
+            return ctx.error({
+                embed: {
+                    title: 'Command not found',
+                    desc: `No command named \`${command}\` was found.`,
+                },
+                flags: dis.MessageFlags.Ephemeral,
+            });
 
-        const row = new dis.ActionRowBuilder<dis.ButtonBuilder>()
-        .addComponents(new dis.ButtonBuilder()
-            .setCustomId(`help:sub:${cmd.category}:${cmd.subcategory}:${ctx.user.id}`)
-            .setLabel("Back")
-            .setEmoji("⬅️")
-            .setStyle(dis.ButtonStyle.Secondary)
+        const row = new dis.ActionRowBuilder<dis.ButtonBuilder>().addComponents(
+            new dis.ButtonBuilder()
+                .setCustomId(`help:sub:${cmd.category}:${cmd.subcategory}:${ctx.user.id}`)
+                .setLabel('Back')
+                .setEmoji('⬅️')
+                .setStyle(dis.ButtonStyle.Secondary),
         );
 
         const replyMethod = ctx.interaction ? ctx.editEmbed : ctx.replyEmbed;
 
         return replyMethod({
-
             embed: {
-
                 title: `/${cmd.name}`,
                 desc: cmd.description,
 
                 footer: 'Help System | Command View',
 
                 fields: [
-
                     {
                         name: `${help.categoryIcons[cmd.category]} Category`,
                         value: Utils.titleCase(cmd.category),
-                        inline: true
+                        inline: true,
                     },
                     {
                         //name: DO SUBCATEGORY ICONS????`${categoryIcons[cmd.category]} Subcategory`,
                         name: `📁 Subcategory`,
                         value: Utils.titleCase(cmd.subcategory),
-                        inline: true
+                        inline: true,
                     },
                     {
                         name: `🎚️ Required Permission`,
                         value: ace.PermissionLevel[cmd.requiredLevel],
-                        inline: true
+                        inline: true,
                     },
                     {
                         name: `🛠️ Usage`,
-                        value: cmd.help?.usage ?? 'None'
-                    }
-                ]
-
+                        value: cmd.help?.usage ?? 'None',
+                    },
+                ],
             },
 
             thumbnail: ace.media.local('command_help'),
@@ -166,122 +145,94 @@ export async function renderHelpView(
 
             components: [row],
 
-            flags: dis.MessageFlags.Ephemeral
-
+            flags: dis.MessageFlags.Ephemeral,
         });
-
     }
 
     // SUBCATEGORY VIEW
     if (subcategory) {
-
-        if (!category) return ctx.error({
-            embed: {
-                title: "Category not specified",
-                desc: "A category must be specified to view a subcategory."
-            },
-            flags: dis.MessageFlags.Ephemeral,
-        });
+        if (!category)
+            return ctx.error({
+                embed: {
+                    title: 'Category not specified',
+                    desc: 'A category must be specified to view a subcategory.',
+                },
+                flags: dis.MessageFlags.Ephemeral,
+            });
 
         const commands = await help.getCommands(category, subcategory);
 
-        const backRow = new dis.ActionRowBuilder<dis.ButtonBuilder>()
-        .addComponents(new dis.ButtonBuilder()
-            .setCustomId(`help:cat:${category}:${ctx.user.id}`)
-            .setLabel("Back")
-            .setEmoji("⬅️")
-            .setStyle(dis.ButtonStyle.Secondary)
+        const backRow = new dis.ActionRowBuilder<dis.ButtonBuilder>().addComponents(
+            new dis.ButtonBuilder()
+                .setCustomId(`help:cat:${category}:${ctx.user.id}`)
+                .setLabel('Back')
+                .setEmoji('⬅️')
+                .setStyle(dis.ButtonStyle.Secondary),
         );
 
         const replyMethod = ctx.interaction ? ctx.editEmbed : ctx.replyEmbed;
 
         return replyMethod({
-
             embed: {
-
                 title: `${help.categoryIcons[category] ?? help.categoryIcons['default']} ${Utils.titleCase(category)}`,
                 desc: commands.length
-                ? commands.map(cmd =>
-                    `### \`/${cmd.name}\`\n${cmd.description}`
-                ).join('\n\n')
-                : "No commands found.",
+                    ? commands.map((cmd) => `### \`/${cmd.name}\`\n${cmd.description}`).join('\n\n')
+                    : 'No commands found.',
 
-                footer: 'Help System | Subcategory View'
-
+                footer: 'Help System | Subcategory View',
             },
 
             thumbnail: ace.media.local('subcategory_help'),
             footerIcon: ace.media.local('branding'),
 
-            components: [
-                buildCommandMenu(commands, ctx.user.id),
-                backRow
-            ],
+            components: [buildCommandMenu(commands, ctx.user.id), backRow],
 
-            flags: dis.MessageFlags.Ephemeral
-
+            flags: dis.MessageFlags.Ephemeral,
         });
-
     }
 
     // CATEGORY VIEW
     if (category) {
-
         const subcategories = await help.getSubcategories(category);
 
-        const backRow = new dis.ActionRowBuilder<dis.ButtonBuilder>()
-        .addComponents(new dis.ButtonBuilder()
-            .setCustomId(`help:back:${ctx.user.id}`)
-            .setLabel("Back")
-            .setEmoji("⬅️")
-            .setStyle(dis.ButtonStyle.Secondary)
+        const backRow = new dis.ActionRowBuilder<dis.ButtonBuilder>().addComponents(
+            new dis.ButtonBuilder()
+                .setCustomId(`help:back:${ctx.user.id}`)
+                .setLabel('Back')
+                .setEmoji('⬅️')
+                .setStyle(dis.ButtonStyle.Secondary),
         );
 
         const replyMethod = ctx.interaction ? ctx.editEmbed : ctx.replyEmbed;
 
         return replyMethod({
-
             embed: {
-
                 title: `${help.categoryIcons[category] ?? help.categoryIcons['default']} ${Utils.titleCase(category)}`,
                 desc: subcategories.length
-                ? subcategories.map(s => `📁 ${Utils.titleCase(s)}`).join('\n') //`• ${titleCase(sub)}` OR SUBCATEGORY ICONS
-                : "No subcategories found.",
+                    ? subcategories.map((s) => `📁 ${Utils.titleCase(s)}`).join('\n') //`• ${titleCase(sub)}` OR SUBCATEGORY ICONS
+                    : 'No subcategories found.',
 
-                footer: 'Help System | Category View'
-
+                footer: 'Help System | Category View',
             },
 
             thumbnail: ace.media.local('category_help'),
             footerIcon: ace.media.local('branding'),
 
-            components: [
-                buildSubcategoryMenu(category, subcategories, ctx.user.id),
-                backRow
-            ],
+            components: [buildSubcategoryMenu(category, subcategories, ctx.user.id), backRow],
 
-            flags: dis.MessageFlags.Ephemeral
-
+            flags: dis.MessageFlags.Ephemeral,
         });
-
     }
 
     //MAIN MENU
     const categories = await help.getCategories();
 
     return ctx.replyEmbed({
-
         embed: {
-
             title: `${help.commandIcons['help']} Help Menu`,
-            desc: [
-                'Welcome to the help menu.',
-                '',
-                'Use the dropdown below to browse categories'
-            ].join('\n'),
+            desc: ['Welcome to the help menu.', '', 'Use the dropdown below to browse categories'].join('\n'),
 
-            footer: 'Help System | Main Menu'
-
+            footer: 'Help System | Main Menu',
         },
 
         thumbnail: ace.media.local('help_main'),
@@ -289,10 +240,8 @@ export async function renderHelpView(
 
         components: [buildCategoryMenu(categories, ctx.user.id)],
 
-        flags: dis.MessageFlags.Ephemeral
-
+        flags: dis.MessageFlags.Ephemeral,
     });
-
 }
 
 // DONT FORGET TO FIX HELP MENU PREFIX ARGS ARENT WORKNG

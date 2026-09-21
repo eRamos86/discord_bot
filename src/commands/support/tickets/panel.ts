@@ -1,24 +1,17 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
-    prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.ADMIN,
-    help: {
-        usage: "/panel",
-        example: "/panel"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('panel')
-        .setDescription('Spawn a ticket panel'),
+import { PermissionFlagsBits } from 'discord.js';
+import { ticketPanelComponents } from '../../../features/tickets/index.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    responseVisibility: 'public',
+    name: 'panel',
+    desc: 'Publish a support ticket panel',
+    access: { discord: [PermissionFlagsBits.ManageChannels] },
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Panel',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
+        if (!ctx.settings?.tickets.enabled)
+            return ctx.reply('Enable and configure tickets in /config first.');
+        return ctx.reply({
+            content: 'Need support? Open a private ticket.',
+            components: ticketPanelComponents(ctx.settings.tickets.types),
         });
-    }
-};
-
-export default command;
+    },
+} satisfies Command;

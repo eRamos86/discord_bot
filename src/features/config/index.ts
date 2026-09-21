@@ -3,7 +3,7 @@ export * from './renderConfig.js';
 export * from './setConfigValue.js';
 
 // Export setter functions for external use
-export { applyWelcome, applyGoodbye, applyLogging } from './setConfigValue.js';
+export { applyGoodbye, applyLogging, applyWelcome } from './setConfigValue.js';
 
 // Load routes (buttons and modals)
 import './config.routes.js';

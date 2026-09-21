@@ -1,0 +1,687 @@
+[
+    {
+        "name": "8ball",
+        "description": "Ask the magic 8ball a question",
+        "source": "src/commands/fun/games/8ball.ts",
+        "usage": ["/8ball <question>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "account",
+        "description": "Link or unlink your Nova identity",
+        "source": "src/commands/utility/general/account.ts",
+        "usage": ["/account link", "/account unlink", "/account status"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Private slash only"
+    },
+    {
+        "name": "add",
+        "description": "Add support ticket",
+        "source": "src/commands/support/tickets/add.ts",
+        "usage": ["/add <user>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "afk",
+        "description": "Set a server AFK status until your next message",
+        "source": "src/commands/utility/general/afk.ts",
+        "usage": ["/afk [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "apex",
+        "description": "Private vehicle, fuel and maintenance commands",
+        "source": "src/commands/utility/apex.ts",
+        "usage": [
+            "/apex garage",
+            "/apex vehicle <vehicle>",
+            "/apex maintenance <vehicle>",
+            "/apex builds <vehicle>",
+            "/apex odometer <vehicle> <miles>",
+            "/apex fuel <vehicle> <odometer> <gallons> <cost>"
+        ],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: apex; Private slash only"
+    },
+    {
+        "name": "ask",
+        "description": "Use the private, deterministic platform gateway",
+        "source": "src/commands/utility/ask.ts",
+        "usage": ["/ask <question>"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Private slash only"
+    },
+    {
+        "name": "automod",
+        "description": "Enable or disable configured automod filters",
+        "source": "src/commands/admin/automod/automod.ts",
+        "usage": ["/automod <action>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageGuild"
+    },
+    {
+        "name": "balance",
+        "description": "Server economy: balance",
+        "source": "src/commands/utility/economy/balance.ts",
+        "usage": ["/balance [user]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "ban",
+        "description": "Ban a member with an audit case",
+        "source": "src/commands/admin/moderation/ban.ts",
+        "usage": ["/ban <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "BanMembers"
+    },
+    {
+        "name": "case",
+        "description": "Edit a case reason or revoke a case",
+        "source": "src/commands/admin/moderation/case.ts",
+        "usage": ["/case <id> <action> <reason>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "cleanup",
+        "description": "Remove recent bot messages from this channel",
+        "source": "src/commands/admin/moderation/cleanup.ts",
+        "usage": ["/cleanup [amount]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "clearwarnings",
+        "description": "Revoke active warnings while retaining their audit history",
+        "source": "src/commands/admin/moderation/clearwarnings.ts",
+        "usage": ["/clearwarnings <user> <reason>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "close",
+        "description": "Close support ticket",
+        "source": "src/commands/support/tickets/close.ts",
+        "usage": ["/close"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "coinflip",
+        "description": "Flip a coin",
+        "source": "src/commands/fun/games/coinflip.ts",
+        "usage": ["/coinflip"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "config",
+        "description": "Configure server features using menus and forms",
+        "source": "src/commands/admin/config/config.ts",
+        "usage": ["/config [section] [key] [value]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageGuild"
+    },
+    {
+        "name": "daily",
+        "description": "Server economy: daily",
+        "source": "src/commands/utility/economy/daily.ts",
+        "usage": ["/daily"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "deploy",
+        "description": "Synchronize or remove Discord application commands",
+        "source": "src/commands/owner/core/deploy.ts",
+        "usage": ["/deploy [command] [remove] [preview]"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Bot owner; Private slash only"
+    },
+    {
+        "name": "diagnostics",
+        "description": "Inspect bot health and control maintenance mode",
+        "source": "src/commands/owner/core/diagnostics.ts",
+        "usage": ["/diagnostics [maintenance]"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Bot owner; Private slash only"
+    },
+    {
+        "name": "dice",
+        "description": "Roll a die",
+        "source": "src/commands/fun/games/dice.ts",
+        "usage": ["/dice [sides]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "filter",
+        "description": "Toggle an automod filter",
+        "source": "src/commands/admin/automod/filter.ts",
+        "usage": ["/filter <filter> <enabled>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageGuild"
+    },
+    {
+        "name": "flux",
+        "description": "Private financial commands through Flux",
+        "source": "src/commands/utility/flux.ts",
+        "usage": [
+            "/flux quick-expense <amount> <description> [account]",
+            "/flux accounts",
+            "/flux recent",
+            "/flux budgets",
+            "/flux subscriptions",
+            "/flux summary"
+        ],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: flux; Private slash only"
+    },
+    {
+        "name": "give",
+        "description": "Server economy: give",
+        "source": "src/commands/utility/economy/give.ts",
+        "usage": ["/give <user> <amount>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "help",
+        "description": "Search commands, categories and usage",
+        "source": "src/commands/support/help/help.ts",
+        "usage": ["/help [query]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "history",
+        "description": "View recent history for a member",
+        "source": "src/commands/admin/moderation/history.ts",
+        "usage": ["/history <user>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "inventory",
+        "description": "Server economy: inventory",
+        "source": "src/commands/utility/economy/inventory.ts",
+        "usage": ["/inventory"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "joke",
+        "description": "Tell a joke",
+        "source": "src/commands/fun/games/joke.ts",
+        "usage": ["/joke"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "kick",
+        "description": "Kick a member with an audit case",
+        "source": "src/commands/admin/moderation/kick.ts",
+        "usage": ["/kick <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "KickMembers"
+    },
+    {
+        "name": "lock",
+        "description": "Lock the current channel",
+        "source": "src/commands/admin/moderation/lock.ts",
+        "usage": ["/lock"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageChannels"
+    },
+    {
+        "name": "lockdown",
+        "description": "Lock server text channels or restore saved locks",
+        "source": "src/commands/admin/moderation/lockdown.ts",
+        "usage": ["/lockdown <action> <confirm>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Administrator"
+    },
+    {
+        "name": "meme",
+        "description": "A random developer text meme",
+        "source": "src/commands/fun/games/meme.ts",
+        "usage": ["/meme"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "mp",
+        "description": "Private MunchPoints balance, rewards and history",
+        "source": "src/commands/utility/munchpoints.ts",
+        "usage": ["/mp balance", "/mp rewards", "/mp history"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: munchpoints; Private slash only"
+    },
+    {
+        "name": "mute",
+        "description": "Mute a member with an audit case",
+        "source": "src/commands/admin/moderation/mute.ts",
+        "usage": ["/mute <user> [seconds] [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ModerateMembers"
+    },
+    {
+        "name": "nexus",
+        "description": "Read the published Nexus Now entry",
+        "source": "src/commands/utility/nexus.ts",
+        "usage": ["/nexus"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "nickname",
+        "description": "Nickname a member with an audit case",
+        "source": "src/commands/admin/moderation/nickname.ts",
+        "usage": ["/nickname <user> [nickname] [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageNicknames"
+    },
+    {
+        "name": "note",
+        "description": "Note a member with an audit case",
+        "source": "src/commands/admin/moderation/note.ts",
+        "usage": ["/note <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "notifications",
+        "description": "Manage authenticated event routing for this server",
+        "source": "src/commands/owner/core/notifications.ts",
+        "usage": [
+            "/notifications add <source> <type> <channel>",
+            "/notifications add-dm <source> <type>",
+            "/notifications list",
+            "/notifications remove <id>"
+        ],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Bot owner; Private slash only"
+    },
+    {
+        "name": "nowplaying",
+        "description": "Music: nowplaying",
+        "source": "src/commands/utility/music/nowplaying.ts",
+        "usage": ["/nowplaying"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "onboarding",
+        "description": "Preview the configured welcome or goodbye message",
+        "source": "src/commands/admin/config/onboarding.ts",
+        "usage": ["/onboarding <kind>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageGuild"
+    },
+    {
+        "name": "panel",
+        "description": "Publish a support ticket panel",
+        "source": "src/commands/support/tickets/panel.ts",
+        "usage": ["/panel"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageChannels"
+    },
+    {
+        "name": "pause",
+        "description": "Music: pause",
+        "source": "src/commands/utility/music/pause.ts",
+        "usage": ["/pause"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "ping",
+        "description": "Replies with pong. Used to test Bot connectivity.",
+        "source": "src/commands/utility/general/ping.ts",
+        "usage": ["/ping"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "platform-admin",
+        "description": "Inspect registered platform applications",
+        "source": "src/commands/utility/platform-admin.ts",
+        "usage": ["/platform-admin"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: admin (admin, superadmin); Private slash only"
+    },
+    {
+        "name": "play",
+        "description": "Music: play",
+        "source": "src/commands/utility/music/play.ts",
+        "usage": ["/play <track>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "poll",
+        "description": "Create, vote in, and close persistent polls",
+        "source": "src/commands/utility/general/poll.ts",
+        "usage": ["/poll create <question> <choices>", "/poll results <id>", "/poll close <id>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "purge",
+        "description": "Delete up to 100 recent messages",
+        "source": "src/commands/admin/moderation/purge.ts",
+        "usage": ["/purge <amount>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "queue",
+        "description": "Music: queue",
+        "source": "src/commands/utility/music/queue.ts",
+        "usage": ["/queue"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "rank",
+        "description": "View your server level or leaderboard",
+        "source": "src/commands/utility/general/rank.ts",
+        "usage": ["/rank [leaderboard]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "reminder",
+        "description": "Create, list, or cancel persistent DM reminders",
+        "source": "src/commands/utility/general/reminder.ts",
+        "usage": ["/reminder add <minutes> <text>", "/reminder list", "/reminder cancel <id>"],
+        "prefix": true,
+        "aliases": ["timer"],
+        "access": "Everyone"
+    },
+    {
+        "name": "report",
+        "description": "Privately report a member to configured moderators",
+        "source": "src/commands/support/tickets/report.ts",
+        "usage": ["/report <user> <reason>"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Private slash only"
+    },
+    {
+        "name": "resume",
+        "description": "Music: resume",
+        "source": "src/commands/utility/music/resume.ts",
+        "usage": ["/resume"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "role",
+        "description": "Assign or remove a server role with hierarchy checks",
+        "source": "src/commands/admin/config/role.ts",
+        "usage": ["/role add <user> <role>", "/role remove <user> <role>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageRoles"
+    },
+    {
+        "name": "rolemap",
+        "description": "Configure optional Nova-to-Discord role mappings",
+        "source": "src/commands/admin/config/rolemap.ts",
+        "usage": ["/rolemap add <project> <grant> <role>", "/rolemap remove <role>", "/rolemap list"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageGuild, ManageRoles"
+    },
+    {
+        "name": "rolepanel",
+        "description": "Publish verification or self-role controls",
+        "source": "src/commands/admin/config/rolepanel.ts",
+        "usage": ["/rolepanel <type>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageRoles"
+    },
+    {
+        "name": "rolesync",
+        "description": "Reconcile your mapped roles against live Nova grants",
+        "source": "src/commands/utility/general/rolesync.ts",
+        "usage": ["/rolesync"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Private slash only"
+    },
+    {
+        "name": "serverinfo",
+        "description": "Show information about this server",
+        "source": "src/commands/utility/general/serverinfo.ts",
+        "usage": ["/serverinfo"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "shop",
+        "description": "Server economy: shop",
+        "source": "src/commands/utility/economy/shop.ts",
+        "usage": ["/shop [item]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "skip",
+        "description": "Music: skip",
+        "source": "src/commands/utility/music/skip.ts",
+        "usage": ["/skip"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "slowmode",
+        "description": "Set slowmode in a channel",
+        "source": "src/commands/admin/moderation/slowmode.ts",
+        "usage": ["/slowmode <seconds>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageChannels"
+    },
+    {
+        "name": "softban",
+        "description": "Softban a member with an audit case",
+        "source": "src/commands/admin/moderation/softban.ts",
+        "usage": ["/softban <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "BanMembers"
+    },
+    {
+        "name": "status",
+        "description": "Query configured platform health endpoints",
+        "source": "src/commands/utility/status.ts",
+        "usage": ["/status"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: admin (admin, superadmin); Private slash only"
+    },
+    {
+        "name": "sticky",
+        "description": "Set or remove a throttled sticky message in this channel",
+        "source": "src/commands/admin/config/sticky.ts",
+        "usage": ["/sticky [text]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "stop",
+        "description": "Music: stop",
+        "source": "src/commands/utility/music/stop.ts",
+        "usage": ["/stop"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "ticket",
+        "description": "Create and manage support tickets",
+        "source": "src/commands/support/tickets/ticket.ts",
+        "usage": [
+            "/ticket create [subject]",
+            "/ticket close",
+            "/ticket reopen",
+            "/ticket claim",
+            "/ticket transcript",
+            "/ticket rename <name>",
+            "/ticket add <user>",
+            "/ticket remove <user>"
+        ],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "timeout",
+        "description": "Timeout a member with an audit case",
+        "source": "src/commands/admin/moderation/timeout.ts",
+        "usage": ["/timeout <user> [seconds] [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ModerateMembers"
+    },
+    {
+        "name": "unban",
+        "description": "Unban a member with an audit case",
+        "source": "src/commands/admin/moderation/unban.ts",
+        "usage": ["/unban <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "BanMembers"
+    },
+    {
+        "name": "unlock",
+        "description": "Unlock the current channel",
+        "source": "src/commands/admin/moderation/unlock.ts",
+        "usage": ["/unlock"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageChannels"
+    },
+    {
+        "name": "unmute",
+        "description": "Unmute a member with an audit case",
+        "source": "src/commands/admin/moderation/unmute.ts",
+        "usage": ["/unmute <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ModerateMembers"
+    },
+    {
+        "name": "userinfo",
+        "description": "Get info about a user",
+        "source": "src/commands/utility/general/userinfo.ts",
+        "usage": ["/userinfo [user]"],
+        "prefix": true,
+        "aliases": ["uinfo"],
+        "access": "Everyone"
+    },
+    {
+        "name": "volume",
+        "description": "Music: volume",
+        "source": "src/commands/utility/music/volume.ts",
+        "usage": ["/volume <percent>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    },
+    {
+        "name": "warn",
+        "description": "Warn a member with an audit case",
+        "source": "src/commands/admin/moderation/warn.ts",
+        "usage": ["/warn <user> [reason]"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "warnings",
+        "description": "View recent warnings for a member",
+        "source": "src/commands/admin/moderation/warnings.ts",
+        "usage": ["/warnings <user>"],
+        "prefix": true,
+        "aliases": [],
+        "access": "ManageMessages"
+    },
+    {
+        "name": "wiki",
+        "description": "Search authorized Atlas documents privately",
+        "source": "src/commands/utility/wiki.ts",
+        "usage": ["/wiki search <query> [page]", "/wiki open <path>"],
+        "prefix": false,
+        "aliases": [],
+        "access": "Everyone; Live Nova: atlas; Private slash only"
+    },
+    {
+        "name": "work",
+        "description": "Server economy: work",
+        "source": "src/commands/utility/economy/work.ts",
+        "usage": ["/work"],
+        "prefix": true,
+        "aliases": [],
+        "access": "Everyone"
+    }
+]

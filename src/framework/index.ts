@@ -1,4 +1,3 @@
-
 /**
  * Client and related
  */
@@ -17,6 +16,7 @@ export * from './guards/guards.js';
 /**
  * handlers
  */
+export * from './commands/commandSchema.js';
 export * from './handlers/commandHandler.js';
 
 /**
@@ -39,21 +39,10 @@ export * from './router/index.js';
  */
 export * from './embed/index.js';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+ * reusable interactive components (pagination, selection)
+ */
+export * from './components/index.js';
 
 //extras
 

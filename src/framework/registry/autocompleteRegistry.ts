@@ -2,7 +2,7 @@ import type { AutocompleteInteraction } from 'discord.js';
 
 export type AutocompleteHandler = {
     command: string;
-    execute: (interaction: AutocompleteInteraction) => Promise<any>;
+    execute: (interaction: AutocompleteInteraction) => Promise<unknown>;
 };
 
 const handlers = new Map<string, AutocompleteHandler>();

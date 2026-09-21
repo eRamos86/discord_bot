@@ -1,0 +1,14 @@
+import { music } from '../../../features/music/service.js';
+import { requireValue } from '../../../framework/runtime/errors.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'volume',
+    desc: 'Music: volume',
+    prefix: { enabled: true },
+    args: { percent: { type: 'integer', required: true, minValue: 0, maxValue: 100 } },
+    async execute(ctx) {
+        requireValue(ctx.member, 'Use this in a server.');
+        await ctx.defer(64);
+        return ctx.reply(music.control(ctx.member, 'volume', ctx.getNumber('percent') ?? undefined));
+    },
+} satisfies Command;

@@ -1,18 +1,27 @@
-import * as Discord from 'discord.js'
+import * as ace from './src/framework/index.js';
 
-import { PermissionLevel } from "./src/core/guards/permissionLevels.js";
-import { Command } from "./src/core/commands/command.js";
-import { media } from "./src/ui/embeds/media.js";
-import { Colors } from "./src/config/theme.js";
+const command: ace.Command = {
 
-const command: Command = {
+    name: 'name',
+    desc: 'description',
+    args: {
+        required: {
+            type: 'string',
+            required: true,
+            description: 'Required argument'
+        },
+        optional: {
+            type: 'integer',
+            description: 'Optional argument'
+        }
+    },
 
     prefix: {
         enabled: true
     },
 
     aliases: [],
-    requiredLevel: PermissionLevel.PUBLIC,
+    requiredLevel: ace.PermissionLevel.PUBLIC,
 
     help: {
         usage: "`/command` **`<required>`** *`[optional]`*",
@@ -22,32 +31,6 @@ const command: Command = {
             \`/command\` *\`opt:\`* arg
         `.trim()
     },
-
-    data: new Discord.SlashCommandBuilder()
-        .setName('name')
-        .setDescription('description')
-        
-        /*
-        
-        optional:
-
-        .addUserOption(option =>
-            option
-                .setName("user")
-                .setDescription("desc")
-                .setRequired(Boolean)
-        )
-
-        .addIntegerOption(option =>
-            option
-                .setName("amount, number")
-                .setDescription("desc")
-                .setRequired(Boolean)
-        )
-        
-        */
-        
-        ,
 
     async execute(ctx) {
         

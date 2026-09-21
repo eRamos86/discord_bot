@@ -1,13 +1,10 @@
-import {
-    EmbedBuilder,
-    AttachmentBuilder
-} from "discord.js";
+import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 
-import { Colors } from "@config";
+import { Colors } from '@config';
 
-import * as Types from './embed.types.js';
 import * as Constants from './embed.constants.js';
-import { resolveMedia } from "./media.js";
+import * as Types from './embed.types.js';
+import { resolveMedia } from './media.js';
 
 /**
  * Creates a standardized Discord embed.
@@ -31,9 +28,8 @@ export function createEmbed({
     footer,
     color = Colors.primary,
     timestamp = true,
-    fields
+    fields,
 }: Types.EmbedOptions = {}) {
-
     /**
      * Final footer string construction.
      *
@@ -47,9 +43,7 @@ export function createEmbed({
     /**
      * Base embed builder instance with shared styling applied.
      */
-    const embed = new EmbedBuilder()
-    .setColor(color)
-    .setFooter({ text: footerText });
+    const embed = new EmbedBuilder().setColor(color).setFooter({ text: footerText });
 
     // Optional embed properties
     if (timestamp) embed.setTimestamp();
@@ -58,7 +52,6 @@ export function createEmbed({
     if (fields?.length) embed.addFields(fields);
 
     return embed;
-
 }
 
 /**
@@ -76,19 +69,8 @@ export function createEmbed({
  * @param options Payload configuration containing embed and optional media
  * @returns Discord-ready message payload with embeds and attachments
  */
-export function createEmbedPayload(
-    options: Types.PayloadOptions
-) {
-
-    const {
-        embed,
-        thumbnail,
-        image,
-        footerIcon,
-        client,
-        interaction,
-        message
-    } = options;
+export function createEmbedPayload(options: Types.PayloadOptions) {
+    const { embed, thumbnail, image, footerIcon, client, interaction, message } = options;
     const files: AttachmentBuilder[] = [];
 
     /* ------------------------------------ */
@@ -101,19 +83,17 @@ export function createEmbedPayload(
      * Supports both remote URLs and local assets via resolveMedia().
      */
     if (thumbnail) {
-
         const resolved = resolveMedia({
-            location: "thumbnail",
+            location: 'thumbnail',
             media: thumbnail,
             client,
             interaction,
-            message
+            message,
         });
 
         embed.setThumbnail(resolved.url);
 
         if (resolved.attachment) files.push(resolved.attachment);
-
     }
 
     /* ------------------------------------ */
@@ -124,19 +104,17 @@ export function createEmbedPayload(
      * Resolve and attach main embed image if provided.
      */
     if (image) {
-
         const resolved = resolveMedia({
-            location: "image",
+            location: 'image',
             media: image,
             client,
             interaction,
-            message
+            message,
         });
 
         embed.setImage(resolved.url);
 
         if (resolved.attachment) files.push(resolved.attachment);
-
     }
 
     /* ------------------------------------ */
@@ -150,13 +128,12 @@ export function createEmbedPayload(
      * Falls back to BASE_FOOTER if no footer text exists.
      */
     if (footerIcon) {
-
         const resolved = resolveMedia({
-            location: "footer",
+            location: 'footer',
             media: footerIcon,
             client,
             interaction,
-            message
+            message,
         });
 
         /*
@@ -169,7 +146,6 @@ export function createEmbedPayload(
         */
 
         if (resolved.attachment) files.push(resolved.attachment);
-
     }
 
     /**
@@ -179,7 +155,6 @@ export function createEmbedPayload(
      */
     return {
         embeds: [embed],
-        files
+        files,
     };
-
 }

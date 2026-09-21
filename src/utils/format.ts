@@ -32,15 +32,10 @@ export function capitalize(text: string): string {
  * - user-facing labels
  */
 export function titleCase(text: string): string {
-
-    return text
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, char => char.toUpperCase());
-
+    return text.replace(/[-_]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function formatDuration(ms: number): string {
-
     const seconds = Math.floor(ms / 1000);
 
     const days = Math.floor(seconds / 86400);
@@ -54,5 +49,4 @@ export function formatDuration(ms: number): string {
     if (minutes) parts.push(`${minutes}m`);
 
     return parts.join(' ') || '0m';
-
 }

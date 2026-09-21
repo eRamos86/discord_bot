@@ -1,8 +1,9 @@
-import * as dis from 'discord.js';
 import * as ace from '@framework';
-import * as Utils from '@utils';
+import * as dis from 'discord.js';
 
 const command: ace.Command = {
+    name: 'serverinfo',
+    desc: 'Show information about this server',
 
     /**
      * use this if you dont want the command to be prefix enabled.
@@ -28,7 +29,7 @@ const command: ace.Command = {
      * only really matters if the command has options/args
      * use this for the autocomplete logic
      * only works for slash commands
-     * 
+     *
      * @param interaction
      */
     /*
@@ -40,49 +41,22 @@ const command: ace.Command = {
     */
 
     help: {
-        usage: "`/command` **`<required>`** *`[optional]`*",
+        usage: '`/command` **`<required>`** *`[optional]`*',
         example: `
             \`/command\`
             \`/command\` **\`req:\`** arg
             \`/command\` *\`opt:\`* arg
-        `.trim()
+        `.trim(),
     },
 
-    data: new dis.SlashCommandBuilder()
-        .setName('serverinfo')
-        .setDescription('some description')
-
-        /*
-        optional:
-
-        .addUserOption(option =>
-            option
-                .setName("user")
-                .setDescription("desc")
-                .setRequired(Boolean)
-        )
-
-        .addIntegerOption(option =>
-            option
-                .setName("amount")
-                .setDescription("desc")
-                .setRequired(Boolean)
-        )
-        */
-
-        ,
-
     async execute(ctx) {
-
         const guild = ctx.guild;
 
         if (!guild) {
             return ctx.reply({
-                content: "This command can only be used in a server."
+                content: 'This command can only be used in a server.',
             });
         }
-
-        
 
         // OWNER
         const owner = await guild.fetchOwner();
@@ -94,38 +68,26 @@ const command: ace.Command = {
          * Avoids expensive full member chunking
          * which can gateway rate limit large guilds.
          */
-        const cachedBots = guild.members.cache.filter(
-            m => m.user.bot
-        ).size;
+        const cachedBots = guild.members.cache.filter((m) => m.user.bot).size;
 
-        const cachedHumans = guild.members.cache.filter(
-            m => !m.user.bot
-        ).size;
+        const cachedHumans = guild.members.cache.filter((m) => !m.user.bot).size;
 
         // CHANNEL STATS
-        const textChannels = guild.channels.cache.filter(
-            c => c.type === dis.ChannelType.GuildText
-        ).size;
+        const textChannels = guild.channels.cache.filter((c) => c.type === dis.ChannelType.GuildText).size;
 
-        const voiceChannels = guild.channels.cache.filter(
-            c => c.type === dis.ChannelType.GuildVoice
-        ).size;
+        const voiceChannels = guild.channels.cache.filter((c) => c.type === dis.ChannelType.GuildVoice).size;
 
         const stageChannels = guild.channels.cache.filter(
-            c => c.type === dis.ChannelType.GuildStageVoice
+            (c) => c.type === dis.ChannelType.GuildStageVoice,
         ).size;
 
-        const forumChannels = guild.channels.cache.filter(
-            c => c.type === dis.ChannelType.GuildForum
-        ).size;
+        const forumChannels = guild.channels.cache.filter((c) => c.type === dis.ChannelType.GuildForum).size;
 
         const categoryChannels = guild.channels.cache.filter(
-            c => c.type === dis.ChannelType.GuildCategory
+            (c) => c.type === dis.ChannelType.GuildCategory,
         ).size;
 
-        const threadChannels = guild.channels.cache.filter(
-            c => c.isThread()
-        ).size;
+        const threadChannels = guild.channels.cache.filter((c) => c.isThread()).size;
 
         // ROLE STATS
         const roles = guild.roles.cache.size;
@@ -143,20 +105,18 @@ const command: ace.Command = {
 
         // FEATURE FLAGS
         const features = guild.features.length
-            ? guild.features.map(feature => `• ${feature}`).join('\n')
+            ? guild.features.map((feature) => `• ${feature}`).join('\n')
             : 'None';
 
         // CREATED TIMESTAMP
-        const created = Math.floor(
-            guild.createdTimestamp / 1000
-        );
+        const created = Math.floor(guild.createdTimestamp / 1000);
 
         // UPLOAD LIMIT
         const uploadLimit = {
             0: 8,
             1: 8,
             2: 50,
-            3: 100
+            3: 100,
         }[guild.premiumTier];
 
         // BUILD REPLY
@@ -167,7 +127,6 @@ const command: ace.Command = {
                 footer: 'Server Info',
 
                 fields: [
-
                     /**
                      * GENERAL
                      */
@@ -179,10 +138,10 @@ const command: ace.Command = {
                             `Created: <t:${created}:F>`,
                             `Created Relative: <t:${created}:R>`,
                             `Server ID: \`${guild.id}\``,
-                            `Shard ID: ${guild.shardId ?? 'N/A'}`
+                            `Shard ID: ${guild.shardId ?? 'N/A'}`,
                         ].join('\n'),
 
-                        inline: false
+                        inline: false,
                     },
 
                     /**
@@ -195,10 +154,10 @@ const command: ace.Command = {
                             `Total: ${guild.memberCount}`,
                             `Humans: ${cachedHumans}`,
                             `Bots: ${cachedBots}`,
-                            `Max Members: ${guild.maximumMembers ?? 'Unknown'}`
+                            `Max Members: ${guild.maximumMembers ?? 'Unknown'}`,
                         ].join('\n'),
 
-                        inline: true
+                        inline: true,
                     },
 
                     /**
@@ -213,10 +172,10 @@ const command: ace.Command = {
                             `Stages: ${stageChannels}`,
                             `Forums: ${forumChannels}`,
                             `Categories: ${categoryChannels}`,
-                            `Threads: ${threadChannels}`
+                            `Threads: ${threadChannels}`,
                         ].join('\n'),
 
-                        inline: true
+                        inline: true,
                     },
 
                     /**
@@ -231,10 +190,10 @@ const command: ace.Command = {
                             `Stickers: ${stickers}`,
                             `Events: ${scheduledEvents}`,
                             `Boosts: ${boosts}`,
-                            `Boost Tier: ${boostTier}`
+                            `Boost Tier: ${boostTier}`,
                         ].join('\n'),
 
-                        inline: true
+                        inline: true,
                     },
 
                     /**
@@ -247,10 +206,10 @@ const command: ace.Command = {
                             `Verification: ${guild.verificationLevel}`,
                             `NSFW Level: ${guild.nsfwLevel}`,
                             `MFA Level: ${guild.mfaLevel}`,
-                            `Content Filter: ${guild.explicitContentFilter}`
+                            `Content Filter: ${guild.explicitContentFilter}`,
                         ].join('\n'),
 
-                        inline: true
+                        inline: true,
                     },
 
                     /**
@@ -264,10 +223,10 @@ const command: ace.Command = {
                             `Notifications: ${guild.defaultMessageNotifications}`,
                             `AFK Timeout: ${guild.afkTimeout}s`,
                             `Max Bitrate: ${guild.maximumBitrate / 1000}kbps`,
-                            `Max Upload: ${uploadLimit}MB`
+                            `Max Upload: ${uploadLimit}MB`,
                         ].join('\n'),
 
-                        inline: true
+                        inline: true,
                     },
 
                     /**
@@ -278,24 +237,19 @@ const command: ace.Command = {
 
                         value: features,
 
-                        inline: false
-                    }
-
-                ]
+                        inline: false,
+                    },
+                ],
             },
 
             /**
              * MEDIA
              */
             thumbnail: ace.media.guild(),
-            image: guild.banner
-            ? ace.media.guild('banner')
-            : undefined,
-            footerIcon: ace.media.local("branding")
+            image: guild.banner ? ace.media.guild('banner') : undefined,
+            footerIcon: ace.media.local('branding'),
         });
-
-    }
-
+    },
 };
 
 export default command;

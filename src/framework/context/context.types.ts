@@ -1,63 +1,64 @@
 import {
-    ChatInputCommandInteraction,
+    ActionRowBuilder,
     ButtonInteraction,
-    StringSelectMenuInteraction,
-    Message,
-    MessageCreateOptions,
-    MessageEditOptions,
-    MessagePayload,
-    InteractionReplyOptions,
-    InteractionEditReplyOptions,
-    TextBasedChannel,
-    User,
-    Role,
+    ChatInputCommandInteraction,
     Guild,
     GuildMember,
-    ActionRowBuilder,
+    InteractionEditReplyOptions,
+    InteractionReplyOptions,
+    Message,
+    MessageContextMenuCommandInteraction,
+    MessageCreateOptions,
+    MessageEditOptions,
+    MessageFlags,
     MessageMentionOptions,
-    MessageFlags
-} from "discord.js";
+    MessagePayload,
+    ModalSubmitInteraction,
+    Role,
+    StringSelectMenuInteraction,
+    TextBasedChannel,
+    User,
+    UserContextMenuCommandInteraction,
+} from 'discord.js';
 
-import {
-    EmbedOptions,
-    MediaConfig
-} from "../embed/index.js";
 import { BotClient } from '@framework';
+import { EmbedOptions, MediaConfig } from '../embed/index.js';
 
 /**
  * Unified interaction type
  */
 export type AnyInteraction =
+    | ModalSubmitInteraction
+    | UserContextMenuCommandInteraction
+    | MessageContextMenuCommandInteraction
     | ChatInputCommandInteraction
     | ButtonInteraction
     | StringSelectMenuInteraction;
 
-export type ReplyOptions =
-    | string
-    | MessagePayload
-    | InteractionReplyOptions
-    | MessageCreateOptions;
+export type ReplyOptions = string | MessagePayload | InteractionReplyOptions | MessageCreateOptions;
 
-export type EditReplyOptions =
-    | string
-    | InteractionEditReplyOptions
-    | MessageEditOptions;
+export type EditReplyOptions = string | InteractionEditReplyOptions | MessageEditOptions;
 
 export type EmbedReplyOptions = {
-    embed: EmbedOptions;
+    [key: string]: unknown;
+    embed?: EmbedOptions;
+    title?: string;
+    desc?: string;
+    footer?: string;
     thumbnail?: MediaConfig;
     image?: MediaConfig;
     footerIcon?: MediaConfig;
 
-    components?: ActionRowBuilder<any>[];
-    files?: MessageCreateOptions["files"];
+    components?: ActionRowBuilder[];
+    files?: MessageCreateOptions['files'];
     flags?: MessageFlags | number;
     allowedMentions?: MessageMentionOptions;
 };
 
 export type ChannelCtx = {
-    delete: (amount: number) => Promise<any>;
-    send: (options: ReplyOptions) => Promise<any>;
+    raw: TextBasedChannel | null;
+    delete: (amount: number) => Promise<unknown>;
+    send: (options: ReplyOptions) => Promise<unknown>;
 };
 
 /**
@@ -68,15 +69,26 @@ export type ChannelCtx = {
  *
  * This is the foundation layer used to build CommandContext.
  */
+export type ArgsAccessor = ((name: string) => unknown) &
+    Record<string, unknown> & {
+        raw: string[];
+        getString: (name: string) => string | null;
+        getNumber: (name: string) => number | null;
+        getBoolean: (name: string) => boolean | null;
+    };
+
 export type BaseContext = {
     client: BotClient;
+    settings?: import('../../database/guilds/settings.types.js').GuildSettings;
+    identity?: { id: string; project: string; role: string; token: string };
+    requestId?: string;
 
     interaction?: AnyInteraction;
     message?: Message;
 
     createdTimestamp: number;
 
-    args: Record<string, any>;
+    args: ArgsAccessor;
 
     user: User;
     guild: Guild | null;
@@ -89,7 +101,7 @@ export type BaseContext = {
 /**
  * Mutable reply state shared across lifecycle.
  */
-export type CtxState = {storedReply: Message | null;};
+export type CtxState = { storedReply: Message | null; private?: boolean };
 
 /**
  * FINAL COMMAND CONTEXT
@@ -99,6 +111,7 @@ export type CtxState = {storedReply: Message | null;};
  * Built from BaseContext + getters + reply system.
  */
 export type CommandContext = BaseContext & {
+    isInteraction: boolean;
 
     getUser: (name: string) => Promise<User | null>;
     getMember: (name: string) => Promise<GuildMember | null>;
@@ -109,21 +122,21 @@ export type CommandContext = BaseContext & {
     getNumber: (name: string) => number | null;
     getBoolean: (name: string) => boolean | null;
 
-    reply: (options: ReplyOptions) => Promise<any>;
-    editReply: (options: EditReplyOptions) => Promise<any>;
-    followUp: (options: ReplyOptions) => Promise<any>;
-    defer: (flags?: MessageFlags | number) => Promise<any>;
-    send: (options: ReplyOptions) => Promise<any>;
-    edit: (options: EditReplyOptions) => Promise<any>;
+    reply: (options: ReplyOptions) => Promise<unknown>;
+    editReply: (options: EditReplyOptions) => Promise<unknown>;
+    followUp: (options: ReplyOptions) => Promise<unknown>;
+    defer: (flags?: MessageFlags | number) => Promise<unknown>;
+    deferReply: (flags?: MessageFlags | number) => Promise<unknown>;
+    send: (options: ReplyOptions) => Promise<unknown>;
+    edit: (options: EditReplyOptions) => Promise<unknown>;
 
-    replyEmbed: (options: EmbedReplyOptions) => Promise<any>;
-    editEmbed: (options: EmbedReplyOptions) => Promise<any>;
+    replyEmbed: (options: EmbedReplyOptions) => Promise<unknown>;
+    editEmbed: (options: EmbedReplyOptions) => Promise<unknown>;
 
-    success: (options: EmbedReplyOptions) => Promise<any>;
-    error: (options: EmbedReplyOptions) => Promise<any>;
-    warn: (options: EmbedReplyOptions) => Promise<any>;
-    danger: (options: EmbedReplyOptions) => Promise<any>;
+    success: (options: EmbedReplyOptions) => Promise<unknown>;
+    error: (options: EmbedReplyOptions) => Promise<unknown>;
+    warn: (options: EmbedReplyOptions) => Promise<unknown>;
+    danger: (options: EmbedReplyOptions) => Promise<unknown>;
 
-    info: (options: EmbedReplyOptions) => Promise<any>;
-    
+    info: (options: EmbedReplyOptions) => Promise<unknown>;
 };

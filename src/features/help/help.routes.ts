@@ -49,7 +49,7 @@ ace.registerButton({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: []
+            args: {}
         });
 
         return renderHelpView(ctx, {category});

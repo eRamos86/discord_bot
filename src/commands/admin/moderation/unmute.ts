@@ -1,24 +1,11 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { PermissionFlagsBits } from 'discord.js';
+import { moderate } from '../../../features/moderation/service.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'unmute',
+    desc: 'Unmute a member with an audit case',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.MOD,
-    help: {
-        usage: "/unmute",
-        example: "/unmute"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('unmute')
-        .setDescription('Unmute a user'),
-    async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Unmute',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+    access: { discord: [PermissionFlagsBits.ModerateMembers], bot: [PermissionFlagsBits.ModerateMembers] },
+    args: { user: { type: 'user', required: true }, reason: { type: 'string', maxLength: 1000 } },
+    execute: (ctx) => moderate(ctx, 'unmute'),
+} satisfies Command;

@@ -1,24 +1,24 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { PermissionFlagsBits } from 'discord.js';
+import { setChannelLock } from '../../../features/moderation/channels.js';
+import { auditedAction } from '../../../features/moderation/service.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'unlock',
+    desc: 'Unlock the current channel',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.MOD,
-    help: {
-        usage: "/unlock",
-        example: "/unlock"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('unlock')
-        .setDescription('Unlock a channel'),
+    access: { discord: [PermissionFlagsBits.ManageChannels], bot: [PermissionFlagsBits.ManageRoles] },
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Unlock',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        if (!ctx.guild || !ctx.channel.raw) return;
+        const channel = ctx.channel.raw;
+        await ctx.defer(64);
+        const id = await auditedAction(
+            ctx.guild,
+            ctx.user.id,
+            channel.id,
+            'unlock',
+            'Channel permissions changed',
+            () => setChannelLock(ctx.guild!, channel.id, false, `Requested by ${ctx.user.id}`),
+        );
+        return ctx.reply(`Channel unlocked. Case #${id}.`);
+    },
+} satisfies Command;

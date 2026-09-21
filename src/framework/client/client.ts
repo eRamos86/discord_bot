@@ -11,10 +11,7 @@
  * access point for bot systems (commands, handlers, etc.)
  * without relying on separate global state.
  */
-import {
-    Client,
-    Collection
-} from "discord.js";
+import { Client, Collection } from 'discord.js';
 
 import { Command } from '@types';
 

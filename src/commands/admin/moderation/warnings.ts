@@ -1,24 +1,21 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { PermissionFlagsBits } from 'discord.js';
+import { caseHistory } from '../../../features/moderation/service.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'warnings',
+    desc: 'View recent warnings for a member',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.MOD,
-    help: {
-        usage: "/warnings",
-        example: "/warnings"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('warnings')
-        .setDescription('View warnings for a user'),
+    access: { discord: [PermissionFlagsBits.ManageMessages] },
+    args: { user: { type: 'user', required: true } },
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Warnings',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
+        const user = await ctx.getUser('user');
+        if (!user || !ctx.guild) return;
+        const rows = await caseHistory(ctx.guild.id, user.id, true);
+        return ctx.reply({
+            content:
+                rows.map((r) => `#${r.id} ${r.action} (${r.status}): ${r.reason.slice(0, 70)}`).join('\n') ||
+                'No cases found.',
+            flags: 64,
         });
-    }
-};
-
-export default command;
+    },
+} satisfies Command;

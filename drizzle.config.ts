@@ -1,10 +1,4 @@
-import type { Config } from 'drizzle-kit';
-
-export default {
-    schema: './src/database/schema.ts',
-    out: './drizzle',
-    dialect: 'postgresql',
-    dbCredentials: {
-        url: process.env.DATABASE_URL!,
-    },
-} satisfies Config;
+/** Migrations are reviewed SQL under drizzle/. Run npm run db:migrate.
+ * Schema push/code generation is intentionally not used for the SQL-owned domain tables.
+ */
+export {};

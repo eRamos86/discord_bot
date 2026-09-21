@@ -1,24 +1,14 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { music } from '../../../features/music/service.js';
+import { requireValue } from '../../../framework/runtime/errors.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'stop',
+    desc: 'Music: stop',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.PUBLIC,
-    help: {
-        usage: "/stop",
-        example: "/stop"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('stop')
-        .setDescription('Stop the music and clear the queue'),
+    args: {},
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Stop',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        requireValue(ctx.member, 'Use this in a server.');
+        await ctx.defer(64);
+        return ctx.reply(music.control(ctx.member, 'stop', ctx.getNumber('percent') ?? undefined));
+    },
+} satisfies Command;

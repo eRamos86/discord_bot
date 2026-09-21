@@ -1,49 +1,52 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
 
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "ignoreDeprecations": "6.0",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "ignoreDeprecations": "6.0",
 
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "baseUrl": ".",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "baseUrl": ".",
 
-    "paths": {
-      "@config": ["src/config/index.ts"],
-      "@config/*": ["src/config/*"],
-      "@config/env": ["src/config/env.ts"],
-      "@config/botConfig": ["src/config/botConfig.ts"],
-      "@config/owners": ["src/config/owners.ts"],
-      "@config/theme": ["src/config/theme.ts"],
-      "@config/presences": ["src/config/presences.ts"],
+        "paths": {
+            "@config": ["src/config/index.ts"],
+            "@config/*": ["src/config/*"],
+            "@config/env": ["src/config/env.ts"],
+            "@config/botConfig": ["src/config/botConfig.ts"],
+            "@config/owners": ["src/config/owners.ts"],
+            "@config/theme": ["src/config/theme.ts"],
+            "@config/presences": ["src/config/presences.ts"],
 
-      "@framework": ["src/framework/index.ts"],
-      "@framework/*": ["src/framework/*"],
+            "@framework": ["src/framework/index.ts"],
+            "@framework/*": ["src/framework/*"],
 
-      "@events": ["src/events/index.ts"],
-      "@events/*": ["src/events/*"],
+            "@events": ["src/events/index.ts"],
+            "@events/*": ["src/events/*"],
 
-      "@features": ["src/features/index.ts"],
-      "@features/*": ["src/features/*"],
+            "@features": ["src/features/index.ts"],
+            "@features/*": ["src/features/*"],
 
-      "@types": ["src/types/index.ts"],
-      "@types/*": ["src/types/*"],
+            "@types": ["src/types/index.ts"],
+            "@types/*": ["src/types/*"],
 
-      "@ui": ["src/ui/index.ts"],
-      "@ui/*": ["src/ui/*"],
+            "@ui": ["src/ui/index.ts"],
+            "@ui/*": ["src/ui/*"],
 
-      "@utils": ["src/utils/index.ts"],
-      "@utils/*": ["src/utils/*"],
+            "@utils": ["src/utils/index.ts"],
+            "@utils/*": ["src/utils/*"],
 
-      "@db": ["src/database/index.ts"],
-      "@db/*": ["src/database/*"]
-    }
-  },
+            "@db": ["src/database/index.ts"],
+            "@db/*": ["src/database/*"]
+        }
+    },
 
-  "include": ["src"]
+    "include": ["src"]
 }

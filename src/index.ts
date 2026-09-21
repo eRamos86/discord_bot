@@ -1,135 +1,98 @@
-import * as dis from 'discord.js';
-import * as url from 'url';
-import fs from 'fs';
-import path from 'path';
-import * as ace from '@framework';
-import dotenv from 'dotenv';
-import { createServer } from 'http';
-
-// pre
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config();
-
-// Health check HTTP server for Docker healthchecks
-// This avoids creating new Discord WebSocket connections for health checks
-const HEALTH_PORT = process.env.HEALTH_PORT ? parseInt(process.env.HEALTH_PORT) : 3000;
-
-function startHealthServer() {
-    const server = createServer((req, res) => {
-        if (req.url === '/health' || req.url === '/healthz') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                status: 'ok', 
-                timestamp: new Date().toISOString(),
-                uptime: process.uptime(),
-                ready: client.isReady()
-            }));
-        } else {
-            res.writeHead(404);
-            res.end('Not Found');
-        }
-    });
-    
-    server.listen(HEALTH_PORT, '0.0.0.0', () => {
-        console.log(`Health check server listening on port ${HEALTH_PORT}`);
-    });
-    
-    return server;
+import { registerMaintenance } from './features/engagement/maintenance.js';
+import { Client, GatewayIntentBits, Options, Partials } from 'discord.js';
+import 'dotenv/config';
+import { validateEnvironment } from './config/validate.js';
+import { pool } from './database/client.js';
+import { registerDeliveryJobs } from './features/engagement/reminders.js';
+import { music } from './features/music/service.js';
+import { startPresence } from './features/presence.js';
+import type { BotClient } from './framework/client/client.js';
+import { Scheduler } from './framework/jobs/scheduler.js';
+import { loadCommands } from './framework/loaders/commands.js';
+import { loadEvents } from './framework/loaders/events.js';
+import { reportError } from './framework/runtime/errors.js';
+import { createHttpServer } from './framework/runtime/httpServer.js';
+import { runtime } from './framework/runtime/state.js';
+import { botConfig } from './config/botConfig.js';
+const config = validateEnvironment(process.env);
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildModeration,
+    ],
+    partials: [Partials.Message, Partials.Channel, Partials.GuildMember],
+    allowedMentions: { parse: [], repliedUser: false },
+    makeCache: Options.cacheWithLimits({ MessageManager: 100 }),
+    sweepers: { messages: { interval: 300, lifetime: 900 } },
+    rest: { timeout: 15000 },
+}) as BotClient;
+const scheduler = new Scheduler();
+let accepting = false;
+let closing = false;
+let stopPresence: () => void = () => {};
+const server = createHttpServer(client, () => accepting);
+async function shutdown(code = 0) {
+    if (closing) return;
+    closing = true;
+    accepting = false;
+    const deadline = setTimeout(() => process.exit(1), 25000);
+    deadline.unref();
+    server.close();
+    stopPresence();
+    music.stopAll();
+    await scheduler.stop();
+    client.destroy();
+    await pool.end();
+    clearTimeout(deadline);
+    process.exitCode = code;
 }
-
-//#region CLIENT INITIALIZATION
-
-    /**
-     * Main discord client instance.
-     * 
-     * configured with required gateway intents for:
-     * - Guild access
-     * - Member caching (permissions, roles, etc)
-     * - Message content
-     */
-    console.log('Initializing Discord bot client...');
-
-    const client = new dis.Client({intents: [
-        dis.GatewayIntentBits.Guilds,
-        dis.GatewayIntentBits.GuildMembers,
-        dis.GatewayIntentBits.GuildMessages,
-        dis.GatewayIntentBits.MessageContent,
-    ]});
-
-//#endregion
-
-//#region COMMAND LOADING
-
-    /**
-     * Loads all commands from the command directory and attaches
-     * them to the client for runtime access
-     */
-    console.log('loading commands...');
-    (client as ace.BotClient).commands = await ace.loadCommands();
-
-//#endregion
-
-//#region FEATURES REGISTRATION
-
-    /**
-     * Importing features automatically
-     * registers routs into registries. 
-     */
-    await import('@features');
-
-//#endregion
-
-//#region EVENT LOADING
-
-    //MAKE THIS A LOADER IN CORE/LOADERS
-    ace.loadEvents(client);
-
-//#endregion
-
-//#region ERROR HANDLING
-
-    /**
-     * Prevent Discord.js client errors
-     * from crashing the process.
-     */
-    client.on("error", (error) => {
-        console.error("[DISCORD CLIENT ERROR]");
-        console.error(error);
+process.once('SIGTERM', () => {
+    void shutdown();
+});
+process.once('SIGINT', () => {
+    void shutdown();
+});
+process.on('unhandledRejection', (error) => {
+    reportError(error, 'unhandled_rejection');
+    void shutdown(1);
+});
+process.on('uncaughtException', (error) => {
+    reportError(error, 'uncaught_exception');
+    void shutdown(1);
+});
+client.on('error', (error) => reportError(error, 'discord'));
+client.on('shardError', (error) => reportError(error, 'shard'));
+try {
+    // Fail before login when migrations or persistence are unavailable.
+    await pool.query('SELECT revision FROM guild_settings LIMIT 1');
+    await pool.query('SELECT id FROM jobs LIMIT 1');
+    await runtime.load();
+    await botConfig.load();
+    client.commands = await loadCommands();
+    await import('./features/index.js');
+    await loadEvents(client);
+    registerDeliveryJobs(scheduler, client);
+    await registerMaintenance(scheduler);
+    client.once('clientReady', () => {
+        accepting = true;
+        scheduler.start();
+        stopPresence = startPresence(client);
     });
-
-    /**
-     * Websocket / shard errors.
-     */
-    client.on("shardError", (error) => {
-        console.error("[SHARD ERROR]");
-        console.error(error);
-    });
-
-    /**
-     * Node promise safety.
-     */
-    process.on("unhandledRejection", (reason) => {
-        console.error("[UNHANDLED REJECTION]");
-        console.error(reason);
-    });
-
-    process.on("uncaughtException", (error) => {
-        console.error("[UNCAUGHT EXCEPTION]");
-        console.error(error);
-    });
-
-//#endregion
-
-/**
- * BOT LOGIN
- * 
- * Logs the bot into Discord using the provided token
- * from environment variables.
- */
-import { ENV } from '@config/env';
-
-// Start health check server BEFORE logging in to Discord
-startHealthServer();
-
-client.login(ENV.TOKEN);
+    if (process.argv.includes('--check')) {
+        console.log('Startup checks passed; Discord login was not attempted.');
+        await shutdown();
+    } else {
+        await new Promise<void>((resolve, reject) => {
+            server.once('error', reject);
+            server.listen(config.port, '0.0.0.0', resolve);
+        });
+        await client.login(config.token);
+    }
+} catch (error) {
+    reportError(error, 'startup');
+    await shutdown(1);
+}

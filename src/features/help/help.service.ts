@@ -1,6 +1,7 @@
 import path from 'path';
 import { pathToFileURL } from 'url';
 
+import { materializeCommand } from '@framework/commands/commandSchema.js';
 import * as Utils from '@utils';
 
 import type * as Types from '../../types/index.js';
@@ -10,89 +11,64 @@ import type * as Types from '../../types/index.js';
  * flattened command metadata for the help syste.
  */
 export async function getAllCommands(): Promise<Types.LoadedCommand[]> {
-
     const isProd = process.env.NODE_ENV === 'production';
-    const baseDir = path.join(
-        process.cwd(),
-        isProd ? 'dist' : 'src',
-        'commands'
-    );
+    const baseDir = path.join(process.cwd(), isProd ? 'dist' : 'src', 'commands');
 
     const commandFiles = Utils.getCommandFiles(baseDir);
 
-    const results = await Promise.all(commandFiles.map(async file => {
+    const results = await Promise.all(
+        commandFiles.map(async (file) => {
+            const mod = await import(pathToFileURL(file).href);
+            const raw = mod.default;
 
-        const mod = await import(pathToFileURL(file).href);
-        const cmd = mod.default;
+            if (!raw || typeof raw !== 'object') return null;
+            const cmd = materializeCommand(raw as Types.Command);
 
-        if (!cmd || typeof cmd !== 'object') return null;
+            const name = cmd.data?.name;
+            const json = cmd.data?.toJSON() as { description?: string } | undefined;
+            const description = json?.description ?? cmd.desc;
+            if (!name || !description) return null;
 
-        const name = cmd.data?.name;
-        const description = cmd.data?.description ?? cmd.description;
-        if (!name || !description) return null;
+            const relativePath = path
+                .relative(path.join(process.cwd(), isProd ? 'dist' : 'src', 'commands'), file)
+                .split(path.sep);
 
-        const relativePath = path.relative(
-            path.join(
-                process.cwd(),
-                isProd ? 'dist' : 'src',
-                'commands'
-            ),
-            file
-        ).split(path.sep);
+            const parts = relativePath.slice(0, -1); // remove filename
 
-        const parts = relativePath.slice(0, -1); // remove filename
+            return {
+                name,
+                description,
 
-        return {
+                category: parts[0],
+                subcategory: parts[1] ?? 'general',
 
-            name,
-            description,
+                requiredLevel: cmd.requiredLevel,
 
-            category: parts[0],
-            subcategory: parts[1] ?? 'general',
-
-            requiredLevel: cmd.requiredLevel,
-
-            help: cmd.help
-
-        };
-
-    }));
+                help: cmd.help,
+            };
+        }),
+    );
 
     return results.filter(Boolean) as Types.LoadedCommand[];
-
 }
 
 /**
  * Returns all unique categories.
  */
 export async function getCategories() {
-
     const commands = await getAllCommands();
 
-    return [
-        ...new Set(
-            commands.map(c => c.category)
-        )
-    ];
-
+    return [...new Set(commands.map((c) => c.category))];
 }
 
-/** 
+/**
  * Returns all subcategories
  * inside a category
  */
 export async function getSubcategories(category: string) {
-
     const commands = await getAllCommands();
 
-    return [
-        ...new Set(
-            commands
-            .filter(c => c.category === category)
-            .map(c => c.subcategory)
-        )
-    ];
-
+    return [...new Set(commands.filter((c) => c.category === category).map((c) => c.subcategory))];
 }
 
 /**
@@ -100,14 +76,9 @@ export async function getSubcategories(category: string) {
  * a category + subcategory
  */
 export async function getCommands(category: string, subcategory: string) {
-
     const commands = await getAllCommands();
 
-    return commands.filter(
-        c => c.category === category
-        && c.subcategory === subcategory
-    );
-
+    return commands.filter((c) => c.category === category && c.subcategory === subcategory);
 }
 
 /**
@@ -130,10 +101,7 @@ export interface ResolvedHelpTarget {
     subcategory?: string;
     command?: string;
 
-    error?:
-    | 'INVALID_CATEGORY'
-    | 'INVALID_SUBCATEGORY'
-    | 'INVALID_COMMAND';
+    error?: 'INVALID_CATEGORY' | 'INVALID_SUBCATEGORY' | 'INVALID_COMMAND';
 }
 
 /**
@@ -155,18 +123,14 @@ export interface ResolvedHelpTarget {
  * result object consumed by the help renderer.
  */
 export function resolveHelpTarget(
-    args: Record<string, any>,
-    all: Types.LoadedCommand[]
+    args: Record<string, unknown>,
+    all: Types.LoadedCommand[],
 ): ResolvedHelpTarget {
-
     /**
      * PREFIX PATH
      */
-    if (Array.isArray(args.raw)) {
-
-        const raw = args.raw
-            .filter(Boolean)
-            .map((v: string) => v.toLowerCase());
+    if (Array.isArray(args.raw) && args.raw.length > 0) {
+        const raw = args.raw.filter(Boolean).map((v: string) => v.toLowerCase());
 
         const first = raw[0];
         const second = raw[1];
@@ -178,24 +142,18 @@ export function resolveHelpTarget(
             return {};
         }
 
-        const commandNames = new Set(
-            all.map(c => c.name.toLowerCase())
-        );
+        const commandNames = new Set(all.map((c) => c.name.toLowerCase()));
 
-        const categories = new Set(
-            all.map(c => c.category.toLowerCase())
-        );
+        const categories = new Set(all.map((c) => c.category.toLowerCase()));
 
-        const subcategories = new Set(
-            all.map(c => c.subcategory.toLowerCase())
-        );
+        const subcategories = new Set(all.map((c) => c.subcategory.toLowerCase()));
 
         /**
          * help ping
          */
         if (commandNames.has(first)) {
             return {
-                command: first
+                command: first,
             };
         }
 
@@ -204,27 +162,23 @@ export function resolveHelpTarget(
          * help utility general
          */
         if (categories.has(first)) {
-
             const result: ResolvedHelpTarget = {
-                category: first
+                category: first,
             };
 
             if (!second) {
                 return result;
             }
 
-            const validSubcategory = all.some(c =>
-                c.category.toLowerCase() === first &&
-                c.subcategory.toLowerCase() === second
+            const validSubcategory = all.some(
+                (c) => c.category.toLowerCase() === first && c.subcategory.toLowerCase() === second,
             );
 
             if (!validSubcategory) {
-
                 return {
                     category: first,
-                    error: 'INVALID_SUBCATEGORY'
+                    error: 'INVALID_SUBCATEGORY',
                 };
-
             }
 
             result.subcategory = second;
@@ -238,11 +192,9 @@ export function resolveHelpTarget(
          * User entered a subcategory without a category.
          */
         if (subcategories.has(first)) {
-
             return {
-                error: 'INVALID_SUBCATEGORY'
+                error: 'INVALID_SUBCATEGORY',
             };
-
         }
 
         /**
@@ -251,33 +203,27 @@ export function resolveHelpTarget(
          * Try to guess intent.
          */
 
-        const similarCommands = [...commandNames]
-        .some(name =>
-            name.includes(first) ||
-            first.includes(name)
+        const similarCommands = [...commandNames].some(
+            (name) => name.includes(first) || first.includes(name),
         );
 
         if (similarCommands) {
-
             return {
-                error: 'INVALID_COMMAND'
+                error: 'INVALID_COMMAND',
             };
-
         }
 
         return {
-            error: 'INVALID_CATEGORY'
+            error: 'INVALID_CATEGORY',
         };
-
     }
 
     /**
      * SLASH PATH
      */
     return {
-        category: args.category ?? undefined,
-        subcategory: args.subcategory ?? undefined,
-        command: args.command ?? undefined
+        category: typeof args.category === 'string' ? args.category : undefined,
+        subcategory: typeof args.subcategory === 'string' ? args.subcategory : undefined,
+        command: typeof args.command === 'string' ? args.command : undefined,
     };
-
 }

@@ -1,49 +1,41 @@
-name: Deploy Discord Bot to poopmachine
-
+name: Validate and publish bot image
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to Tailnet (auth key)
-        uses: tailscale/github-action@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Deploy to poopmachine
-        run: |
-          # Write SSH key
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-          # Deploy
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            ace@100.119.115.13 \
-            "
-              set -e
-              cd ~/platform/discord_bot
-              git fetch origin main
-              git reset --hard origin/main
-              git clean -fd
-              git checkout -f main
-              echo 'TOKEN=${{ secrets.DISCORD_TOKEN }}' > .env
-              echo 'DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}' >> .env
-              echo 'OWNER_1=490178836202258437' >> .env
-              echo 'OWNER_2=' >> .env
-              echo 'OWNER_3=' >> .env
-              echo 'DEV_GUILD=849749391619129374' >> .env
-              echo 'CLIENT_ID=848351790345093180' >> .env
-              echo 'NODE_ENV=production' >> .env
-              echo 'GLOBAL_DEPLOY=true' >> .env
-              docker compose up -d --build
-              sleep 5
-              docker compose logs discord_bot --tail 20
-            "
+          node-version: '22.23.1'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run deploy:preview
+      - run: npm audit --omit=dev
+  publish:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/eramos86/discord_bot:${{ github.sha }}

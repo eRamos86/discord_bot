@@ -1,83 +1,26 @@
-import { pgTable, text, boolean, jsonb } from 'drizzle-orm/pg-core';
-
+import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core';
+import type { GuildSettings } from './guilds/settings.types.js';
 export const guildSettings = pgTable('guild_settings', {
     guildId: text('guild_id').primaryKey(),
+    revision: integer('revision').notNull().default(0),
     prefix: text('prefix').default('---'),
-    welcome: jsonb('welcome').$type<{
-        enabled: boolean;
-        channelId: string | null;
-        title: string | null;
-        message: string | null;
-        color: string;
-        image: string | null;
-        footer: string | null;
-    }>().default({
-        enabled: false,
-        channelId: null,
-        title: "Welcome!",
-        message: "{user} joined the server.",
-        color: "#00FF00",
-        image: null,
-        footer: null,
-    }),
-    goodbye: jsonb('goodbye').$type<{
-        enabled: boolean;
-        channelId: string | null;
-        title: string | null;
-        message: string | null;
-        color: string;
-        image: string | null;
-        footer: string | null;
-    }>().default({
-        enabled: false,
-        channelId: null,
-        title: "Goodbye!",
-        message: "{user} left the server.",
-        color: "#FF0000",
-        image: null,
-        footer: null,
-    }),
-    logging: jsonb('logging').$type<{
-        enabled: boolean;
-        channelId: string | null;
-        events: {
-            messages: boolean;
-            edits: boolean;
-            deletions: boolean;
-        };
-    }>().default({
-        enabled: false,
-        channelId: null,
-        events: {
-            messages: false,
-            edits: true,
-            deletions: true,
-        },
-    }),
-    automod: jsonb('automod').$type<{
-        enabled: boolean;
-        filters: {
-            profanity: boolean;
-            links: boolean;
-            invites: boolean;
-            spam: boolean;
-        };
-    }>().default({
-        enabled: false,
-        filters: {
-            profanity: false,
-            links: false,
-            invites: false,
-            spam: false,
-        },
-    }),
+    welcome: jsonb('welcome').$type<GuildSettings['welcome']>(),
+    goodbye: jsonb('goodbye').$type<GuildSettings['goodbye']>(),
+    logging: jsonb('logging').$type<GuildSettings['logging']>(),
+    automod: jsonb('automod').$type<GuildSettings['automod']>(),
+    security: jsonb('security').$type<GuildSettings['security']>(),
+    tickets: jsonb('ticket_settings').$type<GuildSettings['tickets']>(),
+    roles: jsonb('roles').$type<GuildSettings['roles']>(),
+    leveling: jsonb('leveling').$type<GuildSettings['leveling']>(),
+    economy: jsonb('economy').$type<GuildSettings['economy']>(),
+    permissions: jsonb('permissions').$type<GuildSettings['permissions']>(),
+    disabledCommands: jsonb('disabled_commands').$type<string[]>(),
 });
-
+// Retained for migration compatibility; all new economy operations use guild_wallets.
 export const userEconomy = pgTable('user_economy', {
     userId: text('user_id').primaryKey(),
-    balance: text('balance').default('0'), // store as string/numeric string or integer if preferred
+    balance: text('balance').default('0'),
 });
-
 export const tickets = pgTable('tickets', {
     ticketId: text('ticket_id').primaryKey(),
     guildId: text('guild_id').notNull(),

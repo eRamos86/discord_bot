@@ -2,7 +2,7 @@ import type { StringSelectMenuInteraction } from 'discord.js';
 
 export type MenuHandler = {
     id: string;
-    execute: (interaction: StringSelectMenuInteraction) => Promise<any>;
+    execute: (interaction: StringSelectMenuInteraction) => Promise<unknown>;
 };
 
 const menus = new Map<string, MenuHandler>();
@@ -19,8 +19,8 @@ export function registerMenu(handler: MenuHandler) {
  *
  */
 export function getMenuHandler(customId: string) {
-    for (const [id, handler] of menus) {
-        if (customId.startsWith(id)) return handler;
+    for (const [id, handler] of [...menus].sort((a, b) => b[0].length - a[0].length)) {
+        if (customId === id || customId.startsWith(`${id}:`)) return handler;
     }
     return null;
 }

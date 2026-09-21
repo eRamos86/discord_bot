@@ -1,59 +1,27 @@
-import * as dis from 'discord.js';
-import * as ace from '@framework';
-import * as Utils from '@utils';
-
-const command: ace.Command = {
-
-    prefix: {
-        enabled: true
-    },
-
-    aliases: [],
-    requiredLevel: ace.PermissionLevel.MOD,
-
-    help: {
-        usage: "`/purge` **`[amt]`**",
-        example: `
-            \`/purge\` **\`amount:\`** 50
-        `.trim()
-    },
-
-    // COMMAND DATA
-    data: new dis.SlashCommandBuilder()
-    .setName('purge')
-    .setDescription('Delete specified amount of messages.')
-    .addIntegerOption(o =>
-        o
-        .setName('amount')
-        .setDescription('1-100')
-        .setRequired(true)
-    )
-
-    ,
-
+import { PermissionFlagsBits } from 'discord.js';
+import { auditedAction } from '../../../features/moderation/service.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'purge',
+    desc: 'Delete up to 100 recent messages',
+    prefix: { enabled: true },
+    access: { discord: [PermissionFlagsBits.ManageMessages], bot: [PermissionFlagsBits.ManageMessages] },
+    args: { amount: { type: 'integer', required: true, minValue: 1, maxValue: 100 } },
     async execute(ctx) {
-        
-        // GATHER DATA
-        const amount = ctx.getNumber("amount")!;
-
-        // LOGIC
-        if (amount < 1 || amount > 100) {
-            return ctx.reply({
-                content: 'Choose 1-100',
-                flags: 64
-            });
-        }
-
-        const messages = await ctx.channel.delete(amount);
-
-        // BUILD REPLY
-        await ctx.channel.send({
-            content: `Deleted ${messages.size} messages.`,
-            flags: dis.MessageFlags.Ephemeral
-        });
-
+        if (!ctx.guild || !ctx.channel.raw) return;
+        await ctx.defer(64);
+        let count = 0;
+        const id = await auditedAction(
+            ctx.guild,
+            ctx.user.id,
+            ctx.channel.raw.id,
+            'purge',
+            `Requested ${ctx.getNumber('amount')} messages`,
+            async () => {
+                const deleted = (await ctx.channel.delete(ctx.getNumber('amount')!)) as { size: number };
+                count = deleted.size;
+            },
+        );
+        return ctx.reply(`Deleted ${count} messages newer than 14 days. Case #${id}.`);
     },
-
-};
-
-export default command;
+} satisfies Command;

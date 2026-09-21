@@ -1,6 +1,5 @@
 import * as dis from 'discord.js';
 import * as ace from '@framework';
-import * as Utils from '@utils';
 
 /**
  * HELP COMMAND
@@ -91,32 +90,28 @@ const command: ace.Command = {
 
     },
 
-    data: new dis.SlashCommandBuilder()
-
-    .setName('help')
-    .setDescription('Shows the help menu')
-
-    .addStringOption(o =>
-        o
-        .setName('category')
-        .setDescription('Category to view')
-        .setAutocomplete(true)
-        .setRequired(false)
-    )
-    .addStringOption(o =>
-        o
-        .setName('subcategory')
-        .setDescription('Subcategory to view')
-        .setAutocomplete(true)
-        .setRequired(false)
-    )
-    .addStringOption(o =>
-        o
-        .setName('command')
-        .setDescription('Command to view')
-        .setAutocomplete(true)
-        .setRequired(false)
-    ),
+    name: 'help',
+    desc: 'Shows the help menu',
+    args: {
+        category: {
+            type: 'string',
+            description: 'Category to view',
+            autocomplete: true,
+            required: false,
+        },
+        subcategory: {
+            type: 'string',
+            description: 'Subcategory to view',
+            autocomplete: true,
+            required: false,
+        },
+        command: {
+            type: 'string',
+            description: 'Command to view',
+            autocomplete: true,
+            required: false,
+        },
+    },
 
     async execute(ctx) {
 

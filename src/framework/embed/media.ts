@@ -1,14 +1,8 @@
-
-import {
-    Client,
-    User,
-    Message,
-    AttachmentBuilder
-} from 'discord.js';
 import * as Utils from '@utils';
+import { AttachmentBuilder, Client, Message, User } from 'discord.js';
 
-import * as Media from './media.types.js';
 import * as Context from '../context/index.js';
+import * as Media from './media.types.js';
 
 /**
  * Media factory helpers for the embed system.
@@ -27,7 +21,6 @@ import * as Context from '../context/index.js';
  * - decouples embeds from Discord internals
  */
 export const media = {
-
     /**
      * Uses the current interacting user's media.
      *
@@ -37,12 +30,10 @@ export const media = {
      *
      * @param asset Which user asset to resolve
      */
-    user(
-        asset: Media.UserAsset = "avatar"
-    ): Media.UserMediaConfig {
+    user(asset: Media.UserAsset = 'avatar'): Media.UserMediaConfig {
         return {
-            type: "user",
-            asset
+            type: 'user',
+            asset,
         };
     },
 
@@ -57,12 +48,10 @@ export const media = {
      *
      * @param asset Which guild asset to resolve
      */
-    guild(
-        asset: Media.GuildAsset = "icon"
-    ): Media.GuildMediaConfig {
+    guild(asset: Media.GuildAsset = 'icon'): Media.GuildMediaConfig {
         return {
-            type: "guild",
-            asset
+            type: 'guild',
+            asset,
         };
     },
 
@@ -75,12 +64,10 @@ export const media = {
      *
      * @param asset Which bot asset to resolve
      */
-    bot(
-        asset: Media.UserAsset = "avatar"
-    ): Media.BotMediaConfig {
+    bot(asset: Media.UserAsset = 'avatar'): Media.BotMediaConfig {
         return {
-            type: "bot",
-            asset
+            type: 'bot',
+            asset,
         };
     },
 
@@ -94,14 +81,11 @@ export const media = {
      * @param user Discord user to resolve media from
      * @param asset Which user asset to resolve
      */
-    targetUser(
-        user: User,
-        asset: Media.UserAsset = "avatar"
-    ): Media.TargetUserMediaConfig {
+    targetUser(user: User, asset: Media.UserAsset = 'avatar'): Media.TargetUserMediaConfig {
         return {
-            type: "targetUser",
+            type: 'targetUser',
             user,
-            asset
+            asset,
         };
     },
 
@@ -118,11 +102,10 @@ export const media = {
      */
     local(file: string): Media.LocalMediaConfig {
         return {
-            type: "local",
-            file
+            type: 'local',
+            file,
         };
-    }
-
+    },
 };
 
 /**
@@ -148,7 +131,7 @@ export const media = {
 export function resolveMedia(options: {
     /**
      * Embed location.
-     * 
+     *
      * Used for fallback directory lookup.
      */
     location: Media.MediaLocation;
@@ -171,14 +154,7 @@ export function resolveMedia(options: {
      */
     message?: Message;
 }): Media.ResolvedMedia {
-
-    const {
-        location,
-        media,
-        client,
-        interaction,
-        message
-    } = options;
+    const { location, media, client, interaction, message } = options;
 
     /**
      * Shared context references.
@@ -192,86 +168,80 @@ export function resolveMedia(options: {
     const botAvatar = client.user?.displayAvatarURL({ size: 512 }) ?? '';
 
     switch (media.type) {
-
         /**
          * CURRENT USER MEDIA
          */
-        case "user": {
-
+        case 'user': {
             if (!currentUser) return { url: botAvatar };
 
             switch (media.asset) {
-                case "banner": return {url: currentUser.bannerURL?.({ size: 2048 }) || botAvatar};
-                default: return {url: currentUser.displayAvatarURL({ size: 512 })};
+                case 'banner':
+                    return { url: currentUser.bannerURL?.({ size: 2048 }) || botAvatar };
+                default:
+                    return { url: currentUser.displayAvatarURL({ size: 512 }) };
             }
-
         }
 
         /**
          * TARGET USER MEDIA
          */
-        case "targetUser": {
-
+        case 'targetUser': {
             switch (media.asset) {
-                case "banner": return {url: media.user.bannerURL?.({ size: 2048 }) || botAvatar};
-                default: return {url: media.user.displayAvatarURL({ size: 512 })};
+                case 'banner':
+                    return { url: media.user.bannerURL?.({ size: 2048 }) || botAvatar };
+                default:
+                    return { url: media.user.displayAvatarURL({ size: 512 }) };
             }
-
         }
 
         /**
          * GUILD MEDIA
          */
-        case "guild": {
-
+        case 'guild': {
             if (!guild) return { url: botAvatar };
 
-            switch (media.asset) {  
-
-                case "banner": return {url: guild.bannerURL({ size: 2048 }) || botAvatar};
-                case "splash": return {url: guild.splashURL({ size: 2048 }) || botAvatar};
-                case "discoverySplash": return {url: guild.discoverySplashURL({ size: 2048 }) || botAvatar};
-                default: return {url: guild.iconURL({ size: 1024 }) || botAvatar};
-
+            switch (media.asset) {
+                case 'banner':
+                    return { url: guild.bannerURL({ size: 2048 }) || botAvatar };
+                case 'splash':
+                    return { url: guild.splashURL({ size: 2048 }) || botAvatar };
+                case 'discoverySplash':
+                    return { url: guild.discoverySplashURL({ size: 2048 }) || botAvatar };
+                default:
+                    return { url: guild.iconURL({ size: 1024 }) || botAvatar };
             }
         }
 
         /**
          * BOT MEDIA
          */
-        case "bot": {
-
+        case 'bot': {
             if (!client.user) return { url: botAvatar };
 
             switch (media.asset) {
-
-                case "banner": return {url: client.user.bannerURL?.({ size: 2048 }) || botAvatar};
-                default: return {url: client.user.displayAvatarURL({ size: 512 })};
-
+                case 'banner':
+                    return { url: client.user.bannerURL?.({ size: 2048 }) || botAvatar };
+                default:
+                    return { url: client.user.displayAvatarURL({ size: 512 }) };
             }
         }
 
         /**
          * LOCAL FILE MEDIA
          */
-        case "local": {
-
+        case 'local': {
             const exactFile = `${media.file}.png`;
-    
-            if (Utils.fileExists(location, exactFile)) return {
-    
-                url: `attachment://${exactFile}`,
-                attachment: new AttachmentBuilder(
-                    Utils.getFilePath(location, exactFile),
-                    { name: exactFile }
-                )
-    
-            };
+
+            if (Utils.fileExists(location, exactFile))
+                return {
+                    url: `attachment://${exactFile}`,
+                    attachment: new AttachmentBuilder(Utils.getFilePath(location, exactFile), {
+                        name: exactFile,
+                    }),
+                };
 
             break;
-
         }
-
     }
 
     /**
@@ -280,21 +250,20 @@ export function resolveMedia(options: {
      * Attempts to resolve:
      * /images/<location>/default.png
      */
-    const defaultFile = "default.png";
+    const defaultFile = 'default.png';
 
-    if(Utils.fileExists(location, defaultFile)) return {
-        url: `attachment://${defaultFile}`,
-        attachment: new AttachmentBuilder(
-            Utils.getFilePath(location, defaultFile),
-            { name: defaultFile }
-        )
-    };
+    if (Utils.fileExists(location, defaultFile))
+        return {
+            url: `attachment://${defaultFile}`,
+            attachment: new AttachmentBuilder(Utils.getFilePath(location, defaultFile), {
+                name: defaultFile,
+            }),
+        };
 
     /**
      * FINAL FALLBACK
      *
      * Guarantees embeds always contain valid media.
      */
-    return {url: botAvatar};
-
+    return { url: botAvatar };
 }

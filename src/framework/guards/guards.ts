@@ -1,162 +1,45 @@
-/**
- * Guards and permission checks for bot commands.
- */
-import * as dis from "discord.js";
-import * as ace from '@framework';
-import { access } from "fs/promises";
-
-/**
- * Hierarchical permission levels used across the bot.
- *
- * These values define the minimum required access level
- * a user must have to execute a command.
- *
- * The system works by comparing:
- * - user's resolved permission level (see permissionResolver)
- * - command.requiredLevel
- *
- * Higher number = higher privilege.
- *
- * Order:
- * PUBLIC (0)  → default user, no special permissions
- * MOD    (1)  → moderation permissions (kick, manage messages, etc.)
- * ADMIN  (2)  → administrator-level permissions
- * OWNER  (3)  → bot owners (highest priority, bypass most checks)
- *
- * Example:
- * requiredLevel: PermissionLevel.ADMIN
- * → only ADMIN and OWNER can run the command
- */
+import { PermissionsBitField, type Guild, type Message } from 'discord.js';
+import { getOwnerIds } from '../../config/owners.js';
+import type { Command } from '../../types/command.types.js';
+import type { AnyInteraction } from '../context/context.types.js';
 export enum PermissionLevel {
     PUBLIC = 0,
     MOD = 1,
     ADMIN = 2,
-    OWNER = 3
+    OWNER = 3,
 }
-
-/**
- * Determines whether a guild is allowed for bot operation
- * based on the presence and permissions of configured owners.
- *
- * This acts as a safety gate to ensure:
- * - The bot only runs in guilds where at least one owner is present
- * - At least one owner in the guild has Administrator permissions
- *
- * This is typically used as a startup or join-time validation
- * to prevent the bot from operating in unauthorized servers.
- */
-export async function guildAllowed(guild: any): Promise<boolean> {
-
-    /**
-     * Ensure guild member cache is populated before checks.
-     * This avoids false negatives when checking OWNER_IDS.
-     */
-    await guild.members.fetch().catch(() => {});
-
-    /**
-     * Resolve all configured owners who are present in this guild
-     */
-    const ownersInGuild = ace.getOwnerIds().map(id =>
-        guild.members.cache.get(id)
-    ).filter(Boolean);
-
-    /**
-     * If no configured owners are present in the guild,
-     * the guild is automatically disallowed.
-     */
-    if (ownersInGuild.length === 0) return false;
-
-    /**
-     * Check whether at least one owner has Administrator permissions.
-     *
-     * This ensures an owner has full control in the guild
-     * before allowing the bot to operate.
-     */
-    const hasAdminOwner = ownersInGuild.some((member: any) =>
-        member.permissions?.has(dis.PermissionsBitField.Flags.Administrator)
-    );
-
-    return hasAdminOwner;
-    
+/** Optional deployment allowlist; ordinary servers do not require a bot owner to be a member. */
+export async function guildAllowed(guild: Guild): Promise<boolean> {
+    const ids = (process.env.ALLOWED_GUILD_IDS ?? '')
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
+    return ids.length === 0 || ids.includes(guild.id);
 }
-
-/**
- * Resolves a numeric permission level for a user based on:
- * - ownership
- * - Discord permissions
- * - fallback public access
- *
- * Supports both:
- * - slash commands (interaction)
- * - prefix commands (message)
- */
-export function getPermissionLevel(
-    interaction?: ace.AnyInteraction,
-    message?: dis.Message
-): number {
-
-    /**
-     * Resolve user object from either interaction or message
-     */
-    const user = interaction?.user ?? message?.author;
-    const userId = user?.id;
-
-    // Owner check
-    if (userId && ace.getOwnerIds().includes(userId)) return 3;
-
-
-    // resolve guild member
-    const member =
-    (interaction?.member as dis.GuildMember)
-    ?? message?.member
-    ?? null;
-
-    if (!member) return 0;
-
-
-    // Admin check
-    if (member.permissions.has(dis.PermissionsBitField.Flags.Administrator)) return 2;
-
-    // Mod check
-    if (member.permissions.has(dis.PermissionsBitField.Flags.KickMembers) && member.permissions.has(dis.PermissionsBitField.Flags.ManageMessages)) return 1;
-
-    // default Public level
-    return 0;
+export function getPermissionLevel(interaction?: AnyInteraction, message?: Message): number {
+    const id = interaction?.user.id ?? message?.author.id;
+    if (id && getOwnerIds().includes(id)) return PermissionLevel.OWNER;
+    const permissions = interaction?.memberPermissions ?? message?.member?.permissions;
+    if (!permissions) return PermissionLevel.PUBLIC;
+    if (
+        permissions.has(PermissionsBitField.Flags.Administrator) ||
+        permissions.has(PermissionsBitField.Flags.ManageGuild)
+    )
+        return PermissionLevel.ADMIN;
+    if (
+        permissions.has(PermissionsBitField.Flags.ManageMessages) ||
+        permissions.has(PermissionsBitField.Flags.ModerateMembers)
+    )
+        return PermissionLevel.MOD;
+    return PermissionLevel.PUBLIC;
 }
-
-/**
- * Permission guard for command execution.
- *
- * Determines whether a user is allowed to execute a command
- * by comparing their resolved permission level against the
- * command's required permission level.
- *
- * This works for both:
- * - Slash commands (interaction-based)
- * - Prefix commands (message-based)
- *
- * The permission system is centralized via `getPermissionLevel`,
- * which abstracts role / hierarchy logic away from this function.
- */
-export function canRun(
-    interaction?: ace.AnyInteraction,
-    message?: dis.Message,
-    command?: ace.Command
-): boolean {
-
-    /**
-     * Resolve user's permission level from either interaction or message context
-     */
-    const userLevel = getPermissionLevel(interaction, message);
-
-    /**
-     * Minimum required level for this command
-     * Defaults to 0 (no restriction) if not specified
-     */
-    const required = command?.requiredLevel ?? 0;
-
-    /**
-     * Allow execution only if user meets or exceeds required level
-     */
-    return userLevel >= required;
+export function canRun(interaction?: AnyInteraction, message?: Message, command?: Command): boolean {
+    if (!command) return false;
+    const id = interaction?.user.id ?? message?.author.id;
+    if (command.access?.ownerOnly || command.requiredLevel === PermissionLevel.OWNER)
+        return !!id && getOwnerIds().includes(id);
+    const permissions = interaction?.memberPermissions ?? message?.member?.permissions;
+    if (command.access?.discord?.length)
+        return !!permissions && command.access.discord.every((p) => permissions.has(p));
+    return getPermissionLevel(interaction, message) >= (command.requiredLevel ?? 0);
 }

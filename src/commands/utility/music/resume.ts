@@ -1,24 +1,14 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { music } from '../../../features/music/service.js';
+import { requireValue } from '../../../framework/runtime/errors.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'resume',
+    desc: 'Music: resume',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.PUBLIC,
-    help: {
-        usage: "/resume",
-        example: "/resume"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('resume')
-        .setDescription('Resume the current song'),
+    args: {},
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Resume',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        requireValue(ctx.member, 'Use this in a server.');
+        await ctx.defer(64);
+        return ctx.reply(music.control(ctx.member, 'resume', ctx.getNumber('percent') ?? undefined));
+    },
+} satisfies Command;

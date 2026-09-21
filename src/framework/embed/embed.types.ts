@@ -1,15 +1,6 @@
-import {
-    EmbedBuilder,
-    ColorResolvable,
-    APIEmbedField,
-    Client,
-    Message,
-    AttachmentBuilder,
-    User
-} from "discord.js";
+import { APIEmbedField, Client, ColorResolvable, EmbedBuilder, Message } from 'discord.js';
 
 import * as ace from '@framework';
-
 
 /* ---------------------------------------- */
 /* EMBED OPTIONS                            */
@@ -29,8 +20,6 @@ export type EmbedOptions = {
     timestamp?: boolean;
     fields?: APIEmbedField[];
 };
-
-
 
 /* ---------------------------------------- */
 /* PAYLOAD OPTIONS                          */
@@ -55,4 +44,3 @@ export type PayloadOptions = {
     interaction?: ace.AnyInteraction;
     message?: Message;
 };
-

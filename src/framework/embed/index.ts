@@ -21,9 +21,9 @@
 
 //embed
 export * from './embed.constants.js';
-export * from './embed.types.js';
 export * from './embed.js';
+export * from './embed.types.js';
 
 //media
-export * from './media.types.js';
 export * from './media.js';
+export * from './media.types.js';

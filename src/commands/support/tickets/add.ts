@@ -1,24 +1,15 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { manageTicket } from '../../../features/tickets/index.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'add',
+    desc: 'Add support ticket',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.MOD,
-    help: {
-        usage: "/add",
-        example: "/add"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('add')
-        .setDescription('Add a user to a ticket'),
+    args: { user: { type: 'user', required: true } },
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Add',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        if (!ctx.member || !ctx.channel.raw) return;
+        await ctx.defer(64);
+        const user = await ctx.getUser('user');
+        await manageTicket(ctx.member, ctx.channel.raw.id, 'add', user?.id);
+        return ctx.reply('Ticket updated.');
+    },
+} satisfies Command;

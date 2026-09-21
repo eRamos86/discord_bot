@@ -13,4 +13,4 @@
  * - help system embeds
  * - system notifications
  */
-export const BASE_FOOTER = "! Ace. Bot";
+export const BASE_FOOTER = '! Ace. Bot';

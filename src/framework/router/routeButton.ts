@@ -1,11 +1,21 @@
-import { MessageFlags } from "discord.js";
 import { getButtonHandler } from '@framework';
+import { ButtonInteraction, MessageFlags } from 'discord.js';
+import { publicError, reportError } from '../runtime/errors.js';
 
 /**
  * Routes button interactions
  * to registered handlers based on custom ID.
  */
-export async function routeButton(interaction: any) {
+export async function routeButton(interaction: ButtonInteraction) {
+    if (interaction.customId.startsWith('help:')) {
+        const ownerId = interaction.customId.split(':').at(-1);
+        if (ownerId !== interaction.user.id) {
+            return interaction.reply({
+                content: 'This is not your help menu.',
+                flags: MessageFlags.Ephemeral,
+            });
+        }
+    }
 
     const handler = getButtonHandler(interaction.customId);
 
@@ -16,17 +26,10 @@ export async function routeButton(interaction: any) {
 
     try {
         return await handler.execute(interaction);
-    } catch (err) {
-        
-        console.error(`BUTTON ROUTE ERROR: ${err}`);
-
-        if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({
-                content: 'Button interaction failed.',
-                flags: MessageFlags.Ephemeral
-            });
-        }
-
+    } catch (error) {
+        const content = publicError(error, reportError(error, 'component'));
+        if (interaction.deferred && !interaction.replied) return interaction.editReply({ content });
+        if (interaction.replied) return interaction.followUp({ content, flags: 64 });
+        return interaction.reply({ content, flags: 64 });
     }
-
 }

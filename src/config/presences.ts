@@ -1,6 +1,6 @@
-import { ActivityType, PresenceData } from 'discord.js';
+import { ActivityType } from 'discord.js';
 
-export const presences: { type: ActivityType, text: string }[] = [
+export const presences: { type: ActivityType; text: string }[] = [
     {
         type: ActivityType.Playing,
         text: 'a game',

@@ -1,11 +1,6 @@
-import { SlashCommandBuilder, AutocompleteInteraction } from 'discord.js';
+import { AutocompleteInteraction } from 'discord.js';
 
-import {
-    PermissionLevel,
-    CommandContext
-} from '@framework';
-
-
+import { CommandContext, PermissionLevel } from '@framework';
 
 /**
  * Standard command definition used by the command handler system.
@@ -16,7 +11,22 @@ import {
  * - prefix commands
  * - help system integration
  */
+export type AccessPolicy = {
+    guildOnly?: boolean;
+    ownerOnly?: boolean;
+    discord?: bigint[];
+    bot?: bigint[];
+    nova?: { project: string; roles?: string[] };
+    private?: boolean;
+};
 export type Command = {
+    responseVisibility?: 'public' | 'private';
+    access?: AccessPolicy;
+    cooldownSeconds?: number;
+    name?: string;
+    desc?: string;
+    args?: Record<string, ArgumentDefinition>;
+    subcommands?: Record<string, SubcommandDefinition>;
 
     /**
      * Prefix command configuration (optional).
@@ -26,9 +36,6 @@ export type Command = {
     prefix?: {
         enabled: boolean;
         aliases?: string[];
-    } | {
-        enabled: true,
-        aliases: []
     };
 
     /**
@@ -52,19 +59,48 @@ export type Command = {
     /**
      * autocomplete or something
      */
-    autocomplete?: (interaction: AutocompleteInteraction) => Promise<any>;
+    autocomplete?: (interaction: AutocompleteInteraction) => Promise<unknown>;
 
     /**
      * Slash command definition registered with Discord.
      */
-    data: SlashCommandBuilder | any;
+    data?: CommandData;
 
     /**
      * Command execution handler.
      *
      * Runs when the command is triggered via slash or prefix.
      */
-    execute: (ctx: CommandContext) => Promise<any>;
+    execute: (ctx: CommandContext) => Promise<unknown>;
+};
+
+export type CommandData = {
+    name: string;
+    toJSON: () => unknown;
+    options?: readonly unknown[];
+};
+
+export type ArgumentType = 'string' | 'integer' | 'number' | 'boolean' | 'user' | 'role' | 'channel';
+export type ArgumentDefinition = {
+    type: ArgumentType;
+    required?: boolean;
+    description?: string;
+    autocomplete?: boolean;
+    choices?: readonly ArgumentChoice[];
+    minValue?: number;
+    maxValue?: number;
+    minLength?: number;
+    maxLength?: number;
+};
+
+export type ArgumentChoice = {
+    name: string;
+    value: string | number;
+};
+
+export type SubcommandDefinition = {
+    description?: string;
+    args?: Record<string, ArgumentDefinition>;
 };
 
 /**
@@ -73,7 +109,7 @@ export type Command = {
  * Keys are option names from the command definition.
  * Values are converted into Discord.js objects or primitives.
  */
-export type ParsedArgs = Record<string, any>;
+export type ParsedArgs = Record<string, unknown>;
 
 /**
  * Normalized command shape used by the help system.

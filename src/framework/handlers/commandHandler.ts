@@ -1,22 +1,18 @@
-import {
-    User,
-    Role,
-    Guild,
-    Message,
-    ApplicationCommandOptionType,
-    TextBasedChannel
-} from 'discord.js';
+import { logEvent } from '../../features/logging/service.js';
+import { ApplicationCommandOptionType, Guild, Message } from 'discord.js';
+import { randomUUID } from 'node:crypto';
+import { getOwnerIds } from '../../config/owners.js';
+import { getGuildSettings } from '../../database/guilds/settings.helpers.js';
+import { validateArguments } from '../commands/validateArgs.js';
+import { authorizeLocal, Cooldowns } from '../guards/authorize.js';
+import { BotError, publicError, reportError } from '../runtime/errors.js';
+import { runtime } from '../runtime/state.js';
+const cooldowns = new Cooldowns();
 
-import { canRun } from "../guards/guards.js";
-import {
-    createContext,
-    BotClient,
-    AnyInteraction
-} from '@framework';
+import { AnyInteraction, BotClient, createContext } from '@framework';
 
 import * as Types from '@types';
-
-
+import { argumentOptions } from '../commands/commandSchema.js';
 
 /**
  * Core command execution pipeline.
@@ -35,39 +31,70 @@ export async function handleCommand(
     interaction: AnyInteraction | undefined,
     command: Types.Command,
     client: BotClient,
-    args: Record<string, any> = {},
-    message?: Message
+    args: Record<string, unknown> = {},
+    message?: Message,
 ) {
+    if (interaction?.isChatInputCommand() && !interaction.deferred && !interaction.replied) {
+        await interaction.deferReply({
+            flags: command.responseVisibility === 'public' && !command.access?.private ? undefined : 64,
+        });
+    }
 
     // Debug: track command execution
-    console.log(`Running command: ${command.data.name}`);
+    console.log(`Running command: ${command.data?.name ?? command.name}`);
 
     // Normalize prefix command arguments into structured format
     let normalizedArgs = args;
     if (!interaction && message) {
-       
         normalizedArgs = {
-
-            raw: args.raw ?? [],
+            raw: Array.isArray(args.raw)
+                ? args.raw.filter((value): value is string => typeof value === 'string')
+                : [],
 
             ...(await parsePrefixArgs(
                 command,
-                args.raw ?? [],
+                Array.isArray(args.raw)
+                    ? args.raw.filter((value): value is string => typeof value === 'string')
+                    : [],
                 client,
-                message.guild
-            ))
-
+                message.guild,
+            )),
         };
-
     }
-    
 
     // Extract options from slash command interaction
     else if (interaction?.isChatInputCommand()) {
-
         normalizedArgs = {};
-        for (const option of interaction.options.data) normalizedArgs[option.name] = option.value;
-
+        const options = interaction.options.data.flatMap((option) => {
+            if (option.type !== ApplicationCommandOptionType.Subcommand) return [option];
+            normalizedArgs.subcommand = option.name;
+            return option.options ?? [];
+        });
+        for (const option of options) {
+            switch (option.type) {
+                case ApplicationCommandOptionType.User:
+                    normalizedArgs[option.name] = interaction.options.getUser(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.Role:
+                    normalizedArgs[option.name] = interaction.options.getRole(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.Channel:
+                    normalizedArgs[option.name] = interaction.options.getChannel(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.String:
+                    normalizedArgs[option.name] = interaction.options.getString(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.Integer:
+                    normalizedArgs[option.name] = interaction.options.getInteger(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.Number:
+                    normalizedArgs[option.name] = interaction.options.getNumber(option.name) ?? undefined;
+                    break;
+                case ApplicationCommandOptionType.Boolean:
+                    normalizedArgs[option.name] = interaction.options.getBoolean(option.name) ?? undefined;
+                    break;
+            }
+        }
     }
 
     // Build unified command context for execution
@@ -75,23 +102,37 @@ export async function handleCommand(
         interaction,
         message,
         client,
-        args: normalizedArgs
+        args: normalizedArgs,
     });
 
-    // Prevent unauthorized command execution
-    if (!canRun(interaction, message, command)) {
-        return ctx.warn({
-            embed: {
-                title: `You don't have permission to use this command.`
-            }
-        });
+    ctx.requestId = randomUUID();
+    try {
+        const settings = ctx.guild ? await getGuildSettings(ctx.guild.id) : null;
+        if (settings) ctx.settings = settings;
+        authorizeLocal(ctx, command, settings);
+        if (runtime.maintenance && !getOwnerIds().includes(ctx.user.id))
+            throw new BotError('unavailable', 'The bot is undergoing maintenance.');
+        cooldowns.check(
+            `${ctx.guild?.id ?? 'dm'}:${ctx.user.id}:${command.name}`,
+            command.cooldownSeconds ?? 2,
+        );
+        validateArguments(command, normalizedArgs);
+        if (command.access?.private) await ctx.defer(64);
+        if (command.access?.private && command.access?.nova) {
+            const { authorizePlatform } = await import('../../features/platform/auth/index.js');
+            const identity = await authorizePlatform(ctx, command.access.nova);
+            if (!identity) return;
+            ctx.identity = identity;
+        }
+        const result = await command.execute(ctx);
+        if (ctx.guild)
+            await logEvent(ctx.guild, 'commands', 'Command used', `<@${ctx.user.id}> used /${command.name}.`);
+        return result;
+    } catch (error) {
+        const id = reportError(error, 'command');
+        return ctx.reply({ content: publicError(error, id), flags: 64 });
     }
-
-    // Execute resolved command handler with unified context
-    return command.execute(ctx);
 }
-
-
 
 /**
  * Converts raw prefix command arguments into typed values
@@ -108,9 +149,8 @@ export async function parsePrefixArgs(
     command: Types.Command,
     raw: string[],
     client: BotClient,
-    guild: Guild | null
+    guild: Guild | null,
 ): Promise<Types.ParsedArgs> {
-
     /**
      * Base parsed argument container.
      *
@@ -125,21 +165,27 @@ export async function parsePrefixArgs(
      *
      * These are used as the schema for parsing prefix input.
      */
-    const options = command.data?.options ?? [];
+    let values = raw;
+    let options = argumentOptions(command);
+    const subcommandName = raw[0];
+    if (subcommandName && command.subcommands?.[subcommandName]) {
+        parsed.subcommand = subcommandName;
+        values = raw.slice(1);
+        options = Object.entries(command.subcommands[subcommandName].args ?? {}).map(
+            ([name, definition]) => ({
+                name,
+                type: argumentType(definition.type),
+            }),
+        );
+    }
 
     for (let i = 0; i < options.length; i++) {
-
         const option = options[i];
-        const value = raw[i];
+        const value = values[i];
 
-        if (!value) continue;
-
-        for (const option of command.data.options) {
-            console.log(option.name, option.type);
-        }
+        if (!option || !value) continue;
 
         switch (option.type) {
-
             /**
              * STRING OPTION
              *
@@ -147,17 +193,15 @@ export async function parsePrefixArgs(
              * This matches Discord behavior for greedy string arguments.
              */
             case ApplicationCommandOptionType.String: {
-
                 if (i === options.length - 1) {
                     // last string consumes rest of input
-                    const remaining = raw.slice(i).join(" ");
+                    const remaining = values.slice(i).join(' ');
                     parsed[option.name] = remaining;
                     return parsed;
                 } else {
                     parsed[option.name] = value;
                     break;
                 }
-
             }
 
             /**
@@ -166,11 +210,19 @@ export async function parsePrefixArgs(
              * Attempts numeric conversion from string input.
              */
             case ApplicationCommandOptionType.Integer: {
-
                 const num = Number(value);
-                if (!isNaN(num)) parsed[option.name] = num;
+                if (!Number.isFinite(num))
+                    throw new BotError('validation', `Invalid number for ${option.name}.`);
+                parsed[option.name] = num;
                 break;
+            }
 
+            case ApplicationCommandOptionType.Number: {
+                const num = Number(value);
+                if (!Number.isFinite(num))
+                    throw new BotError('validation', `Invalid number for ${option.name}.`);
+                parsed[option.name] = num;
+                break;
             }
 
             /**
@@ -180,19 +232,13 @@ export async function parsePrefixArgs(
              * true, yes, y, 1, on
              */
             case ApplicationCommandOptionType.Boolean: {
-
                 const lower = value.toLowerCase();
 
-                parsed[option.name] = [
-                    "true",
-                    "yes",
-                    "y",
-                    "1",
-                    "on"
-                ].includes(lower);
+                if (!['true', 'yes', 'y', '1', 'on', 'false', 'no', 'n', '0', 'off'].includes(lower))
+                    throw new BotError('validation', `Invalid boolean for ${option.name}.`);
+                parsed[option.name] = ['true', 'yes', 'y', '1', 'on'].includes(lower);
 
                 break;
-
             }
 
             /**
@@ -202,8 +248,7 @@ export async function parsePrefixArgs(
              * and resolves them via the API.
              */
             case ApplicationCommandOptionType.User: {
-
-                const id = value.replace(/[<@!>]/g, "");
+                const id = value.replace(/[<@!>]/g, '');
 
                 try {
                     const user = await client.users.fetch(id);
@@ -211,7 +256,6 @@ export async function parsePrefixArgs(
                 } catch {}
 
                 break;
-
             }
 
             /**
@@ -221,16 +265,14 @@ export async function parsePrefixArgs(
              * Requires guild context.
              */
             case ApplicationCommandOptionType.Role: {
-
                 if (!guild) break;
 
-                const id = value.replace(/[<@&>]/g, "");
+                const id = value.replace(/[<@&>]/g, '');
                 const role = guild.roles.cache.get(id);
 
                 if (role) parsed[option.name] = role;
 
                 break;
-
             }
 
             /**
@@ -239,21 +281,30 @@ export async function parsePrefixArgs(
              * Resolves guild channel and ensures it is text-capable.
              */
             case ApplicationCommandOptionType.Channel: {
-
                 if (!guild) break;
 
-                const id = value.replace(/[<#>]/g, "");
+                const id = value.replace(/[<#>]/g, '');
                 const channel = guild.channels.cache.get(id);
 
-                if (channel && "send" in channel) parsed[option.name] = channel;
+                if (channel && 'send' in channel) parsed[option.name] = channel;
 
                 break;
-
             }
-
         }
-
     }
 
     return parsed;
+}
+
+function argumentType(type: Types.ArgumentType): ApplicationCommandOptionType {
+    const types: Record<Types.ArgumentType, ApplicationCommandOptionType> = {
+        string: ApplicationCommandOptionType.String,
+        integer: ApplicationCommandOptionType.Integer,
+        number: ApplicationCommandOptionType.Number,
+        boolean: ApplicationCommandOptionType.Boolean,
+        user: ApplicationCommandOptionType.User,
+        role: ApplicationCommandOptionType.Role,
+        channel: ApplicationCommandOptionType.Channel,
+    };
+    return types[type];
 }

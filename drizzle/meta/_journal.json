@@ -8,6 +8,20 @@
       "when": 1784245609840,
       "tag": "0000_simple_tana_nile",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789270000000,
+      "tag": "0001_production_domains",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789980000000,
+      "tag": "0002_user_notification_preferences",
+      "breakpoints": true
     }
   ]
 }

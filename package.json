@@ -1,51 +1,69 @@
 {
-  "name": "discord_bot",
-  "version": "1.0.0",
-  "description": "discord bot",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec tsx src/index.ts",
-    "build": "tsc && tsc-alias",
-    "start": "node dist/index.js",
-    "deploy": "tsx src/deploy-commands.ts",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eRamos86/discord_bot.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/eRamos86/discord_bot/issues"
-  },
-  "homepage": "https://github.com/eRamos86/discord_bot#readme",
-  "dependencies": {
-    "@discordjs/voice": "^0.19.2",
-    "bcrypt": "^6.0.0",
-    "discord.js": "^14.26.4",
-    "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
-    "ffmpeg-static": "^5.3.0",
-    "libsodium-wrappers": "^0.8.4",
-    "pg": "^8.22.0",
-    "play-dl": "^1.9.7",
-    "tsconfig-paths": "^4.2.0"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/node": "^25.9.1",
-    "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10",
-    "nodemon": "^3.1.14",
-    "tsc-alias": "^1.8.10",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
-  }
+    "name": "discord_bot",
+    "version": "1.0.0",
+    "description": "Modular Discord administration bot and permission-aware Nova platform gateway",
+    "main": "dist/index.js",
+    "scripts": {
+        "test": "node --import tsx --test tests/*.test.ts",
+        "dev": "node scripts/dev.mjs",
+        "dev:bot": "nodemon --watch src --watch .env -e ts,json,env --exec node --import tsx src/index.ts",
+        "db:up": "node scripts/dev-db.mjs",
+        "db:down": "docker compose -f docker-compose.dev.yml down",
+        "db:reset": "docker compose -f docker-compose.dev.yml down -v && npm run db:up && npm run db:migrate",
+        "build": "node scripts/clean-build.mjs && tsc && tsc-alias",
+        "check:types": "tsc --noEmit",
+        "start": "node dist/index.js",
+        "deploy": "node --import tsx src/deploy-commands.ts",
+        "db:migrate": "node --import tsx src/database/migrate.ts",
+        "lint": "eslint src tests",
+        "format": "prettier --write src tests scripts docs README.md TODO.md package.json tsconfig.json eslint.config.js",
+        "format:check": "prettier --check src tests scripts docs README.md TODO.md package.json tsconfig.json eslint.config.js",
+        "check": "npm run format:check && npm run lint && npm run check:types && npm test && npm run build && npm run check:runtime",
+        "deploy:preview": "node --import tsx src/deploy-commands.ts --dry-run",
+        "start:check": "node dist/index.js --check",
+        "docs:commands": "node --import tsx scripts/document-commands.ts",
+        "check:runtime": "node scripts/check-runtime.mjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/eRamos86/discord_bot.git"
+    },
+    "keywords": [
+        "discord-bot",
+        "typescript",
+        "modular",
+        "nova",
+        "platform-gateway"
+    ],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "bugs": {
+        "url": "https://github.com/eRamos86/discord_bot/issues"
+    },
+    "homepage": "https://github.com/eRamos86/discord_bot#readme",
+    "dependencies": {
+        "@discordjs/voice": "^0.19.2",
+        "discord.js": "^14.26.4",
+        "dotenv": "^17.4.2",
+        "drizzle-orm": "^0.45.2",
+        "libsodium-wrappers": "^0.8.4",
+        "opusscript": "^0.0.8",
+        "pg": "^8.22.0"
+    },
+    "devDependencies": {
+        "@electric-sql/pglite": "^0.5.8",
+        "@types/node": "^25.9.1",
+        "@types/pg": "^8.20.0",
+        "eslint": "^10.10.0",
+        "nodemon": "^3.1.14",
+        "prettier": "^3.9.6",
+        "tsc-alias": "^1.8.10",
+        "tsx": "^4.22.3",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.70.0"
+    },
+    "engines": {
+        "node": ">=22.12.0"
+    }
 }

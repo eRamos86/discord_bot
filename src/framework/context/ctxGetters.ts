@@ -1,11 +1,6 @@
-import {
-    Role,
-    TextBasedChannel,
-    GuildMember,
-    User
-} from "discord.js";
+import { GuildMember, Role, TextBasedChannel, User } from 'discord.js';
 
-import { BaseContext } from "./context.types.js";
+import { BaseContext } from './context.types.js';
 
 /**
  * Creates argument + entity getter utilities for CommandContext.
@@ -14,9 +9,6 @@ import { BaseContext } from "./context.types.js";
  * They are intentionally lightweight and synchronous where possible.
  */
 export function createGetters(ctx: BaseContext) {
-
-    const { args } = ctx;
-
     /**
      * Gets a resolved User argument (if already provided by parser).
      */
@@ -30,7 +22,9 @@ export function createGetters(ctx: BaseContext) {
      */
     const getMember = async (name: string): Promise<GuildMember | null> => {
         const value = ctx.args[name];
-        return value instanceof GuildMember ? value : null;
+        if (value instanceof GuildMember) return value;
+        if (value instanceof User && ctx.guild) return ctx.guild.members.fetch(value.id).catch(() => null);
+        return null;
     };
 
     /**
@@ -46,7 +40,7 @@ export function createGetters(ctx: BaseContext) {
      */
     const getChannel = async (name: string): Promise<TextBasedChannel | null> => {
         const value = ctx.args[name];
-        if (value && typeof value === "object" && "send" in value) return value as TextBasedChannel;
+        if (value && typeof value === 'object' && 'send' in value) return value as TextBasedChannel;
         return null;
     };
 
@@ -55,7 +49,7 @@ export function createGetters(ctx: BaseContext) {
      */
     const getString = (name: string): string | null => {
         const value = ctx.args[name];
-        return typeof value === "string" ? value : null;
+        return typeof value === 'string' ? value : null;
     };
 
     /**
@@ -63,7 +57,7 @@ export function createGetters(ctx: BaseContext) {
      */
     const getNumber = (name: string): number | null => {
         const value = ctx.args[name];
-        return typeof value === "number" ? value : null;
+        return typeof value === 'number' ? value : null;
     };
 
     /**
@@ -71,7 +65,7 @@ export function createGetters(ctx: BaseContext) {
      */
     const getBoolean = (name: string): boolean | null => {
         const value = ctx.args[name];
-        return typeof value === "boolean" ? value : null;
+        return typeof value === 'boolean' ? value : null;
     };
 
     return {
@@ -81,6 +75,6 @@ export function createGetters(ctx: BaseContext) {
         getChannel,
         getString,
         getNumber,
-        getBoolean
+        getBoolean,
     };
 }

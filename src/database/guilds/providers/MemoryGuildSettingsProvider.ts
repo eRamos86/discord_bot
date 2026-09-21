@@ -1,41 +1,19 @@
-import {
-    GuildSettings,
-    GuildSettingsProvider,
-    createDefaultGuildSettings
-} from '@db';
-
-export class MemoryGuildSettingsProvider
-implements GuildSettingsProvider {
-
-    private cache = new Map<string, GuildSettings>();
-
-    async get(guildId: string): Promise<GuildSettings> {
-
-        let settings = this.cache.get(guildId);
-
-        if (!settings) {
-
-            settings = createDefaultGuildSettings(guildId);
-
-
-            this.cache.set(
-                guildId,
-                settings
-            );
-
-        }
-
-        return settings;
-
+import { BotError } from '../../../framework/runtime/errors.js';
+import { createDefaultGuildSettings } from '../defaults.js';
+import type { GuildSettings, GuildSettingsProvider } from '../settings.types.js';
+/** Explicit test/development adapter. The production entry point requires PostgreSQL. */
+export class MemoryGuildSettingsProvider implements GuildSettingsProvider {
+    private readonly values = new Map<string, GuildSettings>();
+    async get(id: string) {
+        return structuredClone(this.values.get(id) ?? createDefaultGuildSettings(id));
     }
-
-    async update(settings: GuildSettings): Promise<void> {
-
-        this.cache.set(
-            settings.guildId,
-            settings
-        );
-
+    async update(s: GuildSettings) {
+        if ((this.values.get(s.guildId)?.revision ?? 0) !== s.revision)
+            throw new BotError('validation', 'Settings changed; reload /config.');
+        s.revision++;
+        this.values.set(s.guildId, structuredClone(s));
     }
-
+    async delete(id: string) {
+        this.values.delete(id);
+    }
 }

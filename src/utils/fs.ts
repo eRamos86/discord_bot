@@ -1,6 +1,6 @@
-import fs from "fs";
 import type { MediaLocation } from '@framework/embed/index.js';
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Checks whether a media file exists on disk.
@@ -12,10 +12,7 @@ import path from "path";
  * @param file Filename of the asset
  * @returns true if file exists, false otherwise
  */
-export function fileExists(
-    location: MediaLocation,
-    file: string
-) {
+export function fileExists(location: MediaLocation, file: string) {
     return fs.existsSync(getFilePath(location, file));
 }
 
@@ -34,77 +31,24 @@ export function fileExists(
  * @param file Filename of the asset
  * @returns Absolute path to the requested file on disk
  */
-export function getFilePath(
-    location: MediaLocation,
-    file: string
-) {
-    return path.join(
-        process.cwd(),
-        "src",
-        "images",
-        location,
-        file
-    );
+export function getFilePath(location: MediaLocation, file: string) {
+    return path.join(process.cwd(), 'src', 'images', location, file);
 }
 
 export function walk(current: string): string[] {
-    
     const results: string[] = [];
 
     if (fs.existsSync(current)) {
-
-        fs.readdirSync(current).forEach(file => {
-
+        fs.readdirSync(current).forEach((file) => {
             const fullPath = path.join(current, file);
 
             if (fs.lstatSync(fullPath).isDirectory()) {
                 results.push(...walk(fullPath));
-            } else if (fullPath.endsWith('.ts') || fullPath.endsWith('.js')) {
+            } else if (/^[A-Za-z0-9_.-]+\.(?:ts|js)$/.test(file) && !file.endsWith('.d.ts')) {
                 results.push(fullPath);
             }
-
         });
-
     }
 
     return results;
-
 }
-
-/*
-export function walk(current: string) {
-
-    console.log('walk fnction______');
-    ///console.log(current);
-
-        const results: string[] = [];
-
-        const entries = fs.readdirSync(current, {
-            withFileTypes: true
-        });
-
-        for (const entry of entries) {
-
-            const fullPath = path.join(current, entry.name);
-
-            if (entry.isDirectory()) {
-                walk(fullPath);
-                continue;
-            }
-
-            if (
-                entry.name.endsWith(".ts") ||
-                entry.name.endsWith(".js")
-            ) {
-                results.push(fullPath);
-                console.log(fullPath);
-            }
-
-        }
-
-        console.log(results);
-
-        return results
-
-    }
-        */

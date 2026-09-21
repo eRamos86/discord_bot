@@ -1,24 +1,24 @@
-import * as Discord from 'discord.js';
 import * as ace from '@framework';
 
 const command: ace.Command = {
+    responseVisibility: 'public',
+    name: 'coinflip',
+    desc: 'Flip a coin',
     prefix: { enabled: true },
     requiredLevel: ace.PermissionLevel.PUBLIC,
     help: {
-        usage: "/coinflip",
-        example: "/coinflip"
+        usage: '/coinflip',
+        example: '/coinflip',
     },
-    data: new Discord.SlashCommandBuilder()
-        .setName('coinflip')
-        .setDescription('Flip a coin'),
     async execute(ctx) {
+        const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
         return ctx.success({
             embed: {
                 title: 'Coinflip',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
+                desc: `The coin landed on **${result}**.`,
+            },
         });
-    }
+    },
 };
 
 export default command;

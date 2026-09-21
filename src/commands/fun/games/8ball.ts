@@ -1,4 +1,3 @@
-import * as Discord from 'discord.js';
 import * as ace from '@framework';
 
 const answers = [
@@ -17,7 +16,7 @@ const answers = [
     'Better not tell you now.',
     'Cannot predict now.',
     'Concentrate and ask again.',
-    'Don\'t count on it.',
+    "Don't count on it.",
     'My reply is no.',
     'My sources say no.',
     'Outlook not so good.',
@@ -25,37 +24,41 @@ const answers = [
 ];
 
 const command: ace.Command = {
+    responseVisibility: 'public',
+    name: '8ball',
+    desc: 'Ask the magic 8ball a question',
     prefix: { enabled: true },
     requiredLevel: ace.PermissionLevel.PUBLIC,
-    help: {
-        usage: "`/8ball <question>`",
-        example: "`/8ball Will I win?`"
+    args: {
+        question: {
+            type: 'string',
+            required: true,
+            description: 'The question you want to ask',
+        },
     },
-    data: new Discord.SlashCommandBuilder()
-        .setName('8ball')
-        .setDescription('Ask the magic 8ball a question')
-        .addStringOption(option => 
-            option.setName('question')
-                .setDescription('The question you want to ask')
-                .setRequired(true)
-        ),
+    help: {
+        usage: '`/8ball <question>`',
+        example: '`/8ball Will I win?`',
+    },
     async execute(ctx) {
-        const question = ctx.isInteraction ? ctx.interaction.options.getString('question') : ctx.args.join(' ');
+        const question = ctx.args('question');
         if (!question) {
             return ctx.error({
-                title: 'Missing Question',
-                desc: 'You must provide a question to ask the magic 8ball.'
+                embed: {
+                    title: 'Missing Question',
+                    desc: 'You must provide a question to ask the magic 8ball.',
+                },
             });
         }
-        
+
         const answer = answers[Math.floor(Math.random() * answers.length)];
         return ctx.success({
             embed: {
                 title: 'Magic 8Ball',
-                desc: `**Question:** ${question}\n**Answer:** ${answer}`
-            }
+                desc: `**Question:** ${question}\n**Answer:** ${answer}`,
+            },
         });
-    }
+    },
 };
 
 export default command;

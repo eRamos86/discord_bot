@@ -1,8 +1,5 @@
+import { getGuildSettings, GuildSettings, updateGuildSettings } from '@db';
 import * as dis from 'discord.js';
-import { GuildSettings } from '@db';
-import { applyWelcome, applyLogging, applyGoodbye } from '../setConfigValue.js';
-import { getGuildSettings, updateGuildSettings } from '@db';
-import { renderConfig } from '../renderConfig.js';
 
 // Modal custom IDs
 export const WELCOME_MODAL_ID = 'config_welcome_modal';
@@ -13,11 +10,10 @@ const WELCOME_TITLE_INPUT_ID = 'welcome_title';
 const WELCOME_MESSAGE_INPUT_ID = 'welcome_message';
 const WELCOME_COLOR_INPUT_ID = 'welcome_color';
 const WELCOME_CHANNEL_INPUT_ID = 'welcome_channel';
+const WELCOME_ENABLED_INPUT_ID = 'welcome_enabled';
 
 export function createWelcomeModal(settings: GuildSettings) {
-    const modal = new dis.ModalBuilder()
-        .setCustomId(WELCOME_MODAL_ID)
-        .setTitle('Configure Welcome Message');
+    const modal = new dis.ModalBuilder().setCustomId(WELCOME_MODAL_ID).setTitle('Configure Welcome Message');
 
     const titleInput = new dis.TextInputBuilder()
         .setCustomId(WELCOME_TITLE_INPUT_ID)
@@ -55,20 +51,27 @@ export function createWelcomeModal(settings: GuildSettings) {
         .setRequired(false)
         .setMaxLength(30);
 
+    const enabledInput = new dis.TextInputBuilder()
+        .setCustomId(WELCOME_ENABLED_INPUT_ID)
+        .setLabel('Enabled (true or false)')
+        .setStyle(dis.TextInputStyle.Short)
+        .setValue(String(settings.welcome.enabled))
+        .setRequired(true)
+        .setMaxLength(5);
+
     const firstRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(titleInput);
     const secondRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(messageInput);
     const thirdRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(colorInput);
     const fourthRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(channelInput);
+    const fifthRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(enabledInput);
 
-    modal.addComponents(firstRow, secondRow, thirdRow, fourthRow);
+    modal.addComponents(firstRow, secondRow, thirdRow, fourthRow, fifthRow);
 
     return modal;
 }
 
 export function createGoodbyeModal(settings: GuildSettings) {
-    const modal = new dis.ModalBuilder()
-        .setCustomId(GOODBYE_MODAL_ID)
-        .setTitle('Configure Goodbye Message');
+    const modal = new dis.ModalBuilder().setCustomId(GOODBYE_MODAL_ID).setTitle('Configure Goodbye Message');
 
     const titleInput = new dis.TextInputBuilder()
         .setCustomId('goodbye_title')
@@ -106,23 +109,36 @@ export function createGoodbyeModal(settings: GuildSettings) {
         .setRequired(false)
         .setMaxLength(30);
 
+    const enabledInput = new dis.TextInputBuilder()
+        .setCustomId('goodbye_enabled')
+        .setLabel('Enabled (true or false)')
+        .setStyle(dis.TextInputStyle.Short)
+        .setValue(String(settings.goodbye.enabled))
+        .setRequired(true)
+        .setMaxLength(5);
+
     const firstRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(titleInput);
     const secondRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(messageInput);
     const thirdRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(colorInput);
     const fourthRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(channelInput);
+    const fifthRow = new dis.ActionRowBuilder<dis.TextInputBuilder>().addComponents(enabledInput);
 
-    modal.addComponents(firstRow, secondRow, thirdRow, fourthRow);
+    modal.addComponents(firstRow, secondRow, thirdRow, fourthRow, fifthRow);
 
     return modal;
 }
 
-export async function handleWelcomeModal(interaction: any) {
+export async function handleWelcomeModal(interaction: dis.ModalSubmitInteraction) {
     if (!interaction.isModalSubmit()) return;
+    if (!interaction.memberPermissions?.has(dis.PermissionFlagsBits.Administrator)) {
+        return interaction.reply({ content: 'Administrator permission is required.', ephemeral: true });
+    }
 
     const title = interaction.fields.getTextInputValue(WELCOME_TITLE_INPUT_ID);
     const message = interaction.fields.getTextInputValue(WELCOME_MESSAGE_INPUT_ID);
     const color = interaction.fields.getTextInputValue(WELCOME_COLOR_INPUT_ID);
     const channelId = interaction.fields.getTextInputValue(WELCOME_CHANNEL_INPUT_ID);
+    const enabled = parseBoolean(interaction.fields.getTextInputValue(WELCOME_ENABLED_INPUT_ID));
 
     if (!interaction.guild) {
         return interaction.reply({ content: 'This can only be used in a server', ephemeral: true });
@@ -134,30 +150,39 @@ export async function handleWelcomeModal(interaction: any) {
     if (message) settings.welcome.message = message;
     if (color) settings.welcome.color = color;
     if (channelId) settings.welcome.channelId = channelId;
+    settings.welcome.enabled = enabled;
 
     await updateGuildSettings(settings);
 
     const embed = {
-        title: "✅ Welcome Settings Updated",
+        title: '✅ Welcome Settings Updated',
         color: 0x2b2d31,
         fields: [
-            { name: "Title", value: settings.welcome.title ?? "None", inline: true },
-            { name: "Color", value: settings.welcome.color ?? "#00FF00", inline: true },
-            { name: "Channel", value: settings.welcome.channelId ? `<#${settings.welcome.channelId}>` : "Not Set", inline: true },
-            { name: "Enabled", value: settings.welcome.enabled ? "✅" : "❌", inline: true }
-        ]
+            { name: 'Title', value: settings.welcome.title ?? 'None', inline: true },
+            { name: 'Color', value: settings.welcome.color ?? '#00FF00', inline: true },
+            {
+                name: 'Channel',
+                value: settings.welcome.channelId ? `<#${settings.welcome.channelId}>` : 'Not Set',
+                inline: true,
+            },
+            { name: 'Enabled', value: settings.welcome.enabled ? '✅' : '❌', inline: true },
+        ],
     };
 
     await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-export async function handleGoodbyeModal(interaction: any) {
+export async function handleGoodbyeModal(interaction: dis.ModalSubmitInteraction) {
     if (!interaction.isModalSubmit()) return;
+    if (!interaction.memberPermissions?.has(dis.PermissionFlagsBits.Administrator)) {
+        return interaction.reply({ content: 'Administrator permission is required.', ephemeral: true });
+    }
 
     const title = interaction.fields.getTextInputValue('goodbye_title');
     const message = interaction.fields.getTextInputValue('goodbye_message');
     const color = interaction.fields.getTextInputValue('goodbye_color');
     const channelId = interaction.fields.getTextInputValue('goodbye_channel');
+    const enabled = parseBoolean(interaction.fields.getTextInputValue('goodbye_enabled'));
 
     if (!interaction.guild) {
         return interaction.reply({ content: 'This can only be used in a server', ephemeral: true });
@@ -169,19 +194,28 @@ export async function handleGoodbyeModal(interaction: any) {
     if (message) settings.goodbye.message = message;
     if (color) settings.goodbye.color = color;
     if (channelId) settings.goodbye.channelId = channelId;
+    settings.goodbye.enabled = enabled;
 
     await updateGuildSettings(settings);
 
     const embed = {
-        title: "✅ Goodbye Settings Updated",
+        title: '✅ Goodbye Settings Updated',
         color: 0x2b2d31,
         fields: [
-            { name: "Title", value: settings.goodbye.title ?? "None", inline: true },
-            { name: "Color", value: settings.goodbye.color ?? "#FF0000", inline: true },
-            { name: "Channel", value: settings.goodbye.channelId ? `<#${settings.goodbye.channelId}>` : "Not Set", inline: true },
-            { name: "Enabled", value: settings.goodbye.enabled ? "✅" : "❌", inline: true }
-        ]
+            { name: 'Title', value: settings.goodbye.title ?? 'None', inline: true },
+            { name: 'Color', value: settings.goodbye.color ?? '#FF0000', inline: true },
+            {
+                name: 'Channel',
+                value: settings.goodbye.channelId ? `<#${settings.goodbye.channelId}>` : 'Not Set',
+                inline: true,
+            },
+            { name: 'Enabled', value: settings.goodbye.enabled ? '✅' : '❌', inline: true },
+        ],
     };
 
     await interaction.reply({ embeds: [embed], ephemeral: true });
+}
+
+function parseBoolean(value: string): boolean {
+    return ['true', 'yes', '1', 'on'].includes(value.trim().toLowerCase());
 }

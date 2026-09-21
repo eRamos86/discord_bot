@@ -1,24 +1,31 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import { PermissionFlagsBits } from 'discord.js';
+import { saveSetting } from '../../../features/config/settings.service.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'filter',
+    desc: 'Toggle an automod filter',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.ADMIN,
-    help: {
-        usage: "/filter",
-        example: "/filter"
+    access: { discord: [PermissionFlagsBits.ManageGuild] },
+    args: {
+        filter: {
+            type: 'string',
+            required: true,
+            choices: ['profanity', 'links', 'invites', 'spam', 'caps', 'mentions', 'unicode'].map((v) => ({
+                name: v,
+                value: v,
+            })),
+        },
+        enabled: { type: 'boolean', required: true },
     },
-    data: new Discord.SlashCommandBuilder()
-        .setName('filter')
-        .setDescription('Configure automod filters'),
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Filter',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        if (!ctx.guild) return;
+        await saveSetting(
+            ctx.guild,
+            ctx.user.id,
+            'automod',
+            `filters.${ctx.getString('filter')}`,
+            String(ctx.getBoolean('enabled')),
+        );
+        return ctx.reply('Filter updated. Automod must also be enabled.');
+    },
+} satisfies Command;

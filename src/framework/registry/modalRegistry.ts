@@ -2,7 +2,7 @@ import type { ModalSubmitInteraction } from 'discord.js';
 
 export type ModalHandler = {
     id: string;
-    execute: (interaction: ModalSubmitInteraction) => Promise<any>;
+    execute: (interaction: ModalSubmitInteraction) => Promise<unknown>;
 };
 
 const modals = new Map<string, ModalHandler>();
@@ -18,8 +18,8 @@ export function registerModal(handler: ModalHandler) {
  * Find matching modal handler by custom ID
  */
 export function getModalHandler(customId: string) {
-    for (const [id, handler] of modals) {
-        if (customId.startsWith(id)) return handler;
+    for (const [id, handler] of [...modals].sort((a, b) => b[0].length - a[0].length)) {
+        if (customId === id || customId.startsWith(`${id}:`)) return handler;
     }
     return null;
 }

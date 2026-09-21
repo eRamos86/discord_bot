@@ -1,24 +1,27 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import * as economy from '../../../features/engagement/economy.js';
+import { requireValue } from '../../../framework/runtime/errors.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'give',
+    desc: 'Server economy: give',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.PUBLIC,
-    help: {
-        usage: "/give",
-        example: "/give"
+    args: {
+        user: { type: 'user', required: true },
+        amount: { type: 'integer', required: true, minValue: 1, maxValue: 1000000 },
     },
-    data: new Discord.SlashCommandBuilder()
-        .setName('give')
-        .setDescription('Give money to another user'),
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Give',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        requireValue(ctx.guild && ctx.settings, 'Use this in a server.');
+        const s = ctx.settings.economy;
+        requireValue(s.enabled, 'The server economy is disabled.');
+        const user = await ctx.getUser('user');
+        requireValue(user && !user.bot, 'Choose a human recipient.');
+        await economy.transfer(
+            ctx.guild.id,
+            ctx.user.id,
+            user.id,
+            ctx.getNumber('amount')!,
+            ctx.interaction?.id ?? ctx.message!.id,
+        );
+        return ctx.reply('Transfer completed.');
+    },
+} satisfies Command;

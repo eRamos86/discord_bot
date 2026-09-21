@@ -1,24 +1,22 @@
-import * as Discord from 'discord.js';
-import * as ace from '@framework';
-
-const command: ace.Command = {
+import * as economy from '../../../features/engagement/economy.js';
+import { requireValue } from '../../../framework/runtime/errors.js';
+import type { Command } from '../../../types/command.types.js';
+export default {
+    name: 'daily',
+    desc: 'Server economy: daily',
     prefix: { enabled: true },
-    requiredLevel: ace.PermissionLevel.PUBLIC,
-    help: {
-        usage: "/daily",
-        example: "/daily"
-    },
-    data: new Discord.SlashCommandBuilder()
-        .setName('daily')
-        .setDescription('Claim your daily reward'),
+    args: {},
     async execute(ctx) {
-        return ctx.success({
-            embed: {
-                title: 'Daily',
-                desc: 'This command is functional and successfully routed. Logic implementation pending.'
-            }
-        });
-    }
-};
-
-export default command;
+        requireValue(ctx.guild && ctx.settings, 'Use this in a server.');
+        const s = ctx.settings.economy;
+        requireValue(s.enabled, 'The server economy is disabled.');
+        const amount = await economy.reward(
+            ctx.guild.id,
+            ctx.user.id,
+            'daily',
+            s.dailyAmount,
+            ctx.interaction?.id ?? ctx.message!.id,
+        );
+        return ctx.reply(`Received ${amount} ${s.currency}.`);
+    },
+} satisfies Command;
