@@ -86,14 +86,14 @@ jobs:
               docker compose up -d postgres
               ready=0
               for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
-                if docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1; then
+                if docker compose exec -T postgres pg_isready -U discord_bot >/dev/null 2>&1; then
                   ready=1
                   break
                 fi
                 sleep 2
               done
               test \$ready -eq 1
-              docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -c \"ALTER USER discord_bot WITH PASSWORD '${{ secrets.POSTGRES_PASSWORD }}';\"
+              docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U discord_bot -c \"ALTER USER discord_bot WITH PASSWORD '${{ secrets.POSTGRES_PASSWORD }}';\"
 
               docker compose up -d --build || {
                 printf '%s\n' '=== compose up failed; diagnosing ==='
