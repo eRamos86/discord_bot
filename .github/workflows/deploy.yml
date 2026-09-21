@@ -80,7 +80,14 @@ jobs:
               echo 'EVENT_SIGNING_KEYS={}' >> .env
               echo 'MUSIC_TRACKS_JSON={}' >> .env
 
-              docker compose up -d --build
+              docker compose up -d --build || {
+                echo "=== compose up failed; diagnosing ==="
+                docker compose ps -a
+                docker compose logs postgres --tail 100
+                docker compose logs migrate --tail 100
+                docker volume ls | grep -i discord
+                exit 1
+              }
               sleep 8
               docker compose ps
               docker compose logs discord_bot --tail 20
