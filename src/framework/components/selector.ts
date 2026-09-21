@@ -1,8 +1,4 @@
-import {
-    ActionRowBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuInteraction,
-} from 'discord.js';
+import { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuInteraction } from 'discord.js';
 import { registerMenu } from '../registry/menuRegistry.js';
 import type { CommandContext } from '../context/context.types.js';
 

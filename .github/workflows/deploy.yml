@@ -1,11 +1,13 @@
-name: Validate and publish bot image
+name: Deploy Discord Bot to poopmachine
+
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -19,23 +21,68 @@ jobs:
       - run: npm run check
       - run: npm run deploy:preview
       - run: npm audit --omit=dev
-  publish:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
     needs: validate
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - name: Connect to Tailnet (auth key)
+        uses: tailscale/github-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/eramos86/discord_bot:${{ github.sha }}
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Deploy to poopmachine
+        run: |
+          # Write SSH key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          # Deploy
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ace@100.119.115.13 \
+            "
+              set -e
+              cd ~/platform/discord_bot
+              git fetch origin main
+              git reset --hard origin/main
+              git clean -fd
+              git checkout -f main
+
+              # Persistent production configuration (rewritten every deploy)
+              echo 'TOKEN=${{ secrets.DISCORD_TOKEN }}' > .env
+              echo 'DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}' >> .env
+              echo 'OWNER_1=490178836202258437' >> .env
+              echo 'OWNER_2=' >> .env
+              echo 'OWNER_3=' >> .env
+              echo 'DEV_GUILD=849749391619129374' >> .env
+              echo 'CLIENT_ID=848351790345093180' >> .env
+              echo 'NODE_ENV=production' >> .env
+              echo 'GLOBAL_DEPLOY=true' >> .env
+              echo 'POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}' >> .env
+              echo 'HEALTH_PORT=3000' >> .env
+              echo 'PRESENCE_INTERVAL_SECONDS=60' >> .env
+              echo 'PRESENCES_JSON=[{\"text\":\"/help\",\"type\":3,\"enabled\":true}]' >> .env
+              echo 'NOVA_API_URL=https://login.eramos.us' >> .env
+              echo 'NOVA_CLIENT_ID=discord-bot' >> .env
+              echo 'NOVA_REDIRECT_URI=https://discord.eramos.us/oauth/nova/callback' >> .env
+              echo 'TOKEN_ENCRYPTION_KEY=e29ab762bc31db64f26a6fba182f11d5339d9e31e49265079c7a6b19e91305b7' >> .env
+              echo 'MUNCHPOINTS_API_URL=https://mp.eramos.us' >> .env
+              echo 'FLUX_API_URL=https://finance.eramos.us' >> .env
+              echo 'APEX_API_URL=https://apex.eramos.us' >> .env
+              echo 'ATLAS_API_URL=https://atlas.eramos.us' >> .env
+              echo 'NEXUS_API_URL=https://eramos.us' >> .env
+              echo 'ADMIN_API_URL=https://admin.eramos.us' >> .env
+              echo 'EVENT_SIGNING_KEYS={}' >> .env
+              echo 'MUSIC_TRACKS_JSON={}' >> .env
+
+              docker compose up -d --build
+              sleep 8
+              docker compose ps
+              docker compose logs discord_bot --tail 20
+              curl -fsS --retry 5 --retry-delay 5 --retry-connrefused http://127.0.0.1:3005/health
+            "

@@ -77,12 +77,7 @@ export async function handleFuel(
 /**
  * Handles updating odometer.
  */
-export async function handleOdometer(
-    ctx: CommandContext,
-    token: string,
-    vehicleId: string,
-    miles: number,
-) {
+export async function handleOdometer(ctx: CommandContext, token: string, vehicleId: string, miles: number) {
     await platform.apex.odometer(token, vehicleId, miles);
     const embed = odometerUpdateEmbed(vehicleId, miles);
     return ctx.reply({ embeds: [embed] });

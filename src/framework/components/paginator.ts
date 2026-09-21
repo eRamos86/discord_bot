@@ -1,10 +1,4 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonInteraction,
-    ButtonStyle,
-    EmbedBuilder,
-} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { registerButton } from '../registry/buttonRegistry.js';
 import type { CommandContext } from '../context/context.types.js';
 
@@ -25,11 +19,7 @@ export type PaginatorOptions = {
  * @param pages Array of EmbedBuilder pages. Must have at least one page.
  * @param options Optional configuration
  */
-export async function paginate(
-    ctx: CommandContext,
-    pages: EmbedBuilder[],
-    options: PaginatorOptions = {},
-) {
+export async function paginate(ctx: CommandContext, pages: EmbedBuilder[], options: PaginatorOptions = {}) {
     const firstPage = pages[0];
     if (!firstPage || pages.length === 0) return ctx.reply('No results.');
     if (pages.length === 1) {

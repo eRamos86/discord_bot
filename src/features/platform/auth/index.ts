@@ -63,4 +63,10 @@ export async function requirePlatformAuth(
     return platform.nova.authorize(ctx.user.id, policy);
 }
 
-export { linkAccountEmbed, accountLinkedEmbed, sessionExpiredEmbed, accountStatusEmbed, accountUnlinkedEmbed } from './embeds.js';
+export {
+    linkAccountEmbed,
+    accountLinkedEmbed,
+    sessionExpiredEmbed,
+    accountStatusEmbed,
+    accountUnlinkedEmbed,
+} from './embeds.js';

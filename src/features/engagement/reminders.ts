@@ -6,12 +6,20 @@ import { requireValue } from '../../framework/runtime/errors.js';
 export function registerDeliveryJobs(scheduler: Scheduler, client: Client) {
     scheduler.register('user_notification', async (job: Job) => {
         requireValue(
-            job.user_id && typeof job.payload.source === 'string' && typeof job.payload.eventId === 'string' && typeof job.payload.text === 'string',
+            job.user_id &&
+                typeof job.payload.source === 'string' &&
+                typeof job.payload.eventId === 'string' &&
+                typeof job.payload.text === 'string',
             'Invalid user notification.',
         );
         try {
             const user = await client.users.fetch(job.user_id);
-            await user.send({ content: job.payload.text.slice(0, 1900), allowedMentions: { parse: [] }, nonce: nonce(job.id), enforceNonce: true });
+            await user.send({
+                content: job.payload.text.slice(0, 1900),
+                allowedMentions: { parse: [] },
+                nonce: nonce(job.id),
+                enforceNonce: true,
+            });
             await pool.query(
                 `UPDATE notification_deliveries SET status='delivered',delivered_at=now(),detail=NULL
                  WHERE source=$1 AND event_id=$2 AND discord_id=$3`,
@@ -21,7 +29,12 @@ export function registerDeliveryJobs(scheduler: Scheduler, client: Client) {
             await pool.query(
                 `UPDATE notification_deliveries SET status='failed',detail=$4
                  WHERE source=$1 AND event_id=$2 AND discord_id=$3`,
-                [job.payload.source, job.payload.eventId, job.user_id, error instanceof Error ? error.name : 'Discord delivery failed'],
+                [
+                    job.payload.source,
+                    job.payload.eventId,
+                    job.user_id,
+                    error instanceof Error ? error.name : 'Discord delivery failed',
+                ],
             );
             throw error;
         }

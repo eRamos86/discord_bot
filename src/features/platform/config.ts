@@ -20,12 +20,15 @@ export function getServiceBranding(service: ServiceName) {
 /**
  * Dynamic Proxy providing backwards compatibility with static ServiceBranding access.
  */
-export const ServiceBranding = new Proxy({} as Record<string, { color: ColorResolvable; emoji: string; label: string }>, {
-    get(_target, prop: string) {
-        if (typeof prop === 'symbol') return undefined;
-        return getServiceBranding(prop);
+export const ServiceBranding = new Proxy(
+    {} as Record<string, { color: ColorResolvable; emoji: string; label: string }>,
+    {
+        get(_target, prop: string) {
+            if (typeof prop === 'symbol') return undefined;
+            return getServiceBranding(prop);
+        },
     },
-});
+);
 
 /**
  * Creates a platform-branded embed with the service's dynamic color and footer branding.

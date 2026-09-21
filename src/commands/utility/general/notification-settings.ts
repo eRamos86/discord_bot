@@ -1,4 +1,7 @@
-import { listNotificationPreferences, setNotificationPreference } from '../../../features/notifications/preferences.js';
+import {
+    listNotificationPreferences,
+    setNotificationPreference,
+} from '../../../features/notifications/preferences.js';
 import type { Command } from '../../../types/command.types.js';
 
 const source = { type: 'string' as const, required: true, maxLength: 80 };
@@ -23,14 +26,28 @@ export default {
             return ctx.reply('Global notification preference updated.');
         }
         if (action === 'service') {
-            await setNotificationPreference(novaId, ctx.getString('source')!, '*', ctx.getBoolean('enabled')!);
+            await setNotificationPreference(
+                novaId,
+                ctx.getString('source')!,
+                '*',
+                ctx.getBoolean('enabled')!,
+            );
             return ctx.reply('Service notification preference updated.');
         }
         if (action === 'event') {
-            await setNotificationPreference(novaId, ctx.getString('source')!, ctx.getString('type')!, ctx.getBoolean('enabled')!);
+            await setNotificationPreference(
+                novaId,
+                ctx.getString('source')!,
+                ctx.getString('type')!,
+                ctx.getBoolean('enabled')!,
+            );
             return ctx.reply('Event notification preference updated.');
         }
         const rows = await listNotificationPreferences(novaId);
-        return ctx.reply(rows.map((row) => `${row.enabled ? 'enabled' : 'disabled'}: ${row.source}/${row.eventType}`).join('\n') || 'Notifications are enabled by default.');
+        return ctx.reply(
+            rows
+                .map((row) => `${row.enabled ? 'enabled' : 'disabled'}: ${row.source}/${row.eventType}`)
+                .join('\n') || 'Notifications are enabled by default.',
+        );
     },
 } satisfies Command;

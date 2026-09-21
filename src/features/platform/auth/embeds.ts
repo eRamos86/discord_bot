@@ -9,7 +9,7 @@ export function linkAccountEmbed(oauthUrl: string) {
     const embed = platformEmbed('nova', {
         title: '🔗 Connect Your Nova Account',
         desc: [
-            'Your Discord account isn\'t linked to Nova yet.',
+            "Your Discord account isn't linked to Nova yet.",
             '',
             'Nova is the platform identity provider that connects your Discord account to services like Flux, Apex, Atlas, and more.',
             '',

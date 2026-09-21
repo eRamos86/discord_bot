@@ -123,7 +123,11 @@ export class NovaClient extends ServiceClient {
         );
         await enqueue(
             'user_notification',
-            { source: 'nova', eventId, text: 'Nova account linked\nYour verified Nova account is now connected to this Discord account.' },
+            {
+                source: 'nova',
+                eventId,
+                text: 'Nova account linked\nYour verified Nova account is now connected to this Discord account.',
+            },
             new Date(),
             { id: `notification:${eventId}`, userId: pending.discord_id },
         );

@@ -110,9 +110,7 @@ export default {
 
             if (section === 'all' || section === 'theme') {
                 const theme = botConfig.getTheme();
-                const themeLines = Object.entries(theme).map(
-                    ([key, val]) => `• **${key}:** \`${val}\``,
-                );
+                const themeLines = Object.entries(theme).map(([key, val]) => `• **${key}:** \`${val}\``);
                 embed.addFields({
                     name: '🎨 Theme Colors',
                     value: themeLines.join('\n') || 'None configured.',
@@ -175,9 +173,7 @@ export default {
 
             await botConfig.setService(name, { color, emoji, label });
             const s = botConfig.getService(name);
-            return ctx.reply(
-                `✅ Configured service **${s.label}** (${s.emoji}) with color \`${s.color}\`.`,
-            );
+            return ctx.reply(`✅ Configured service **${s.label}** (${s.emoji}) with color \`${s.color}\`.`);
         }
 
         if (action === 'set-prefix') {

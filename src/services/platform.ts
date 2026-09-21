@@ -84,7 +84,8 @@ export class AtlasClient extends ServiceClient {
         }
         const data = record(await this.request('/api/docs', token ? { token } : {}));
         const docs = array(data.docs).filter((d) =>
-            `${String(d.title ?? '')} ${String(d.path ?? '')}`.toLowerCase().includes(query.toLowerCase()));
+            `${String(d.title ?? '')} ${String(d.path ?? '')}`.toLowerCase().includes(query.toLowerCase()),
+        );
         return { total: docs.length, docs: docs.slice(page * 10, page * 10 + 10) };
     }
     open(token: string | undefined, path: string) {
@@ -92,11 +93,11 @@ export class AtlasClient extends ServiceClient {
             throw new BotError('configuration', 'Atlas service is not configured.');
         }
         const cleanPath = path.replace(/^\/+/, '');
-        requireValue(
-            !cleanPath.split('/').some((p) => p === '..' || p === '.'),
-            'Invalid document path.',
+        requireValue(!cleanPath.split('/').some((p) => p === '..' || p === '.'), 'Invalid document path.');
+        return this.request(
+            `/api/docs/${cleanPath.split('/').map(encodeURIComponent).join('/')}`,
+            token ? { token } : {},
         );
-        return this.request(`/api/docs/${cleanPath.split('/').map(encodeURIComponent).join('/')}`, token ? { token } : {});
     }
 }
 export class MunchPointsClient extends ServiceClient {

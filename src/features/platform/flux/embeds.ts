@@ -1,12 +1,5 @@
 import type { EmbedBuilder } from 'discord.js';
-import {
-    platformEmbed,
-    formatCurrency,
-    formatDate,
-    truncate,
-    progressBar,
-    budgetColor,
-} from '../config.js';
+import { platformEmbed, formatCurrency, formatDate, truncate, progressBar, budgetColor } from '../config.js';
 
 /**
  * Renders a list of Flux accounts as a rich embed.
@@ -198,9 +191,7 @@ export function expenseConfirmEmbed(details: {
         fields: [
             { name: 'Amount', value: formatCurrency(details.amount), inline: true },
             { name: 'Description', value: truncate(details.description, 200), inline: true },
-            ...(details.accountName
-                ? [{ name: 'Account', value: details.accountName, inline: true }]
-                : []),
+            ...(details.accountName ? [{ name: 'Account', value: details.accountName, inline: true }] : []),
         ],
     });
 }

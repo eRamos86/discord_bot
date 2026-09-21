@@ -217,13 +217,29 @@ test('webhook verifies exact bytes, timestamp, source, and fixed destinations', 
 
 test('recipient envelopes accept only a canonical Nova selector and no Discord destination', () => {
     const event = parseEvent(
-        { version: 1, id: 'event.1', source: 'apex', type: 'maintenance.due', title: 'Due', message: 'Soon', recipient: { novaUserId: 'nova-user' } },
+        {
+            version: 1,
+            id: 'event.1',
+            source: 'apex',
+            type: 'maintenance.due',
+            title: 'Due',
+            message: 'Soon',
+            recipient: { novaUserId: 'nova-user' },
+        },
         'apex',
     );
     assert.equal(event.recipientNovaId, 'nova-user');
     assert.throws(() =>
         parseEvent(
-            { version: 1, id: 'event.2', source: 'apex', type: 'maintenance.due', title: 'Due', message: 'Soon', recipient: { novaUserId: 'nova-user', discordId: 'forbidden' } },
+            {
+                version: 1,
+                id: 'event.2',
+                source: 'apex',
+                type: 'maintenance.due',
+                title: 'Due',
+                message: 'Soon',
+                recipient: { novaUserId: 'nova-user', discordId: 'forbidden' },
+            },
             'apex',
         ),
     );

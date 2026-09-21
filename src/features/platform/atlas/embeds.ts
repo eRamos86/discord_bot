@@ -17,7 +17,14 @@ export function formatMarkdownForDiscord(md: string): string {
         .replace(/>\s*\[!IMPORTANT\]/gi, '> ❗ **Important**')
         .replace(/>\s*\[!WARNING\]/gi, '> ⚠️ **Warning**')
         .replace(/>\s*\[!CAUTION\]/gi, '> 🛑 **Caution**')
-        .replace(/\$\$(.+?)\$\$/gs, (_, math) => `\`${math.replace(/\\text\{([^}]+)\}/g, '$1').replace(/\\rightarrow/g, '->').trim()}\``)
+        .replace(
+            /\$\$(.+?)\$\$/gs,
+            (_, math) =>
+                `\`${math
+                    .replace(/\\text\{([^}]+)\}/g, '$1')
+                    .replace(/\\rightarrow/g, '->')
+                    .trim()}\``,
+        )
         .replace(/\n{3,}/g, '\n\n');
 }
 
@@ -84,9 +91,10 @@ export function searchResultsEmbed(
     for (const doc of results.docs) {
         const title = truncate(String(doc.title ?? 'Document'), 60);
         const path = truncate(String(doc.path ?? ''), 80);
-        const description = typeof doc.description === 'string' && doc.description && doc.description !== title
-            ? `\n> ${truncate(doc.description, 100)}`
-            : '';
+        const description =
+            typeof doc.description === 'string' && doc.description && doc.description !== title
+                ? `\n> ${truncate(doc.description, 100)}`
+                : '';
         const category = typeof doc.category === 'string' ? ` [${doc.category}]` : '';
         embed.addFields({
             name: `📄 ${title}${category}`,
@@ -169,7 +177,10 @@ export function buildSearchComponents(
  * Builds formatted paginated embeds for an opened Atlas document.
  */
 export function documentPages(doc: Record<string, unknown>, path: string): EmbedBuilder[] {
-    const title = truncate(String(doc.title ?? path.split('/').pop()?.replace(/\.md$/, '') ?? 'Atlas Document'), 200);
+    const title = truncate(
+        String(doc.title ?? path.split('/').pop()?.replace(/\.md$/, '') ?? 'Atlas Document'),
+        200,
+    );
     const rawContent = String(doc.content ?? doc.markdown ?? 'No content available.').trim();
     const formatted = formatMarkdownForDiscord(rawContent);
     const chunks = splitMarkdownIntoPages(formatted, 2000);

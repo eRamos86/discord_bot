@@ -73,7 +73,10 @@ export class BotConfigManager {
             }
             this.loaded = true;
         } catch (error) {
-            console.warn('[BotConfig] Could not load persistent config from database, using defaults:', error);
+            console.warn(
+                '[BotConfig] Could not load persistent config from database, using defaults:',
+                error,
+            );
         }
     }
 

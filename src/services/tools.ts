@@ -55,7 +55,7 @@ gatewayTools.register({
     name: 'public.generic',
     project: 'generic',
     public: true,
-    match: (text) => /how.*\brecent\b.*\btransactions\b/i.test(text) ? {} : null,
+    match: (text) => (/how.*\brecent\b.*\btransactions\b/i.test(text) ? {} : null),
     async execute(_token, _args) {
         return 'You can view recent transactions with the command `/flux recent`. This command requires a linked account because it accesses your personal data. For public documentation, see `/wiki <topic>`.';
     },
@@ -65,7 +65,8 @@ gatewayTools.register({
 gatewayTools.register({
     name: 'mp.balance',
     project: 'munchpoints',
-    match: (text) => /\b(munchpoints|mp)\b.*\bbalance\b|\bbalance\b.*\bmunchpoints\b/i.test(text) ? {} : null,
+    match: (text) =>
+        /\b(munchpoints|mp)\b.*\bbalance\b|\bbalance\b.*\bmunchpoints\b/i.test(text) ? {} : null,
     async execute(token) {
         return `MunchPoints: ${String(record(await platform.munchpoints.balance(token)).points)}`;
     },
@@ -75,7 +76,7 @@ gatewayTools.register({
 gatewayTools.register({
     name: 'apex.garage',
     project: 'apex',
-    match: (text) => /\b(garage|my vehicles)\b/i.test(text) ? {} : null,
+    match: (text) => (/\b(garage|my vehicles)\b/i.test(text) ? {} : null),
     async execute(token) {
         return displayRows(await platform.apex.garage(token), [
             'id',
@@ -91,7 +92,7 @@ gatewayTools.register({
 gatewayTools.register({
     name: 'flux.recent',
     project: 'flux',
-    match: (text) => /\brecent (transactions|expenses)\b/i.test(text) ? {} : null,
+    match: (text) => (/\brecent (transactions|expenses)\b/i.test(text) ? {} : null),
     async execute(token) {
         return displayRows(await platform.flux.recent(token), ['date', 'description', 'amount']);
     },

@@ -12,34 +12,28 @@ import { renderHelpView } from './help.views.js';
  * HELP BACK BUTTON
  */
 ace.registerButton({
-
     id: 'help:back',
 
     async execute(interaction) {
-        
         await interaction.deferUpdate();
 
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
         return renderHelpView(ctx, {});
-
-    }
-
+    },
 });
 
 /**
  * HELP CATEGORY BACK BUTTON
  */
 ace.registerButton({
-
     id: 'help:cat',
 
     async execute(interaction) {
-
         await interaction.deferUpdate();
 
         const parts = interaction.customId.split(':');
@@ -49,24 +43,20 @@ ace.registerButton({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
-        return renderHelpView(ctx, {category});
-
-    }
-
+        return renderHelpView(ctx, { category });
+    },
 });
 
 /**
  * HELP SUBCATEGORY BACK BUTTON
  */
 ace.registerButton({
-
     id: 'help:sub',
 
     async execute(interaction) {
-
         await interaction.deferUpdate();
 
         const parts = interaction.customId.split(':');
@@ -77,24 +67,20 @@ ace.registerButton({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
-        return renderHelpView(ctx, {category, subcategory});
-
-    }
-
+        return renderHelpView(ctx, { category, subcategory });
+    },
 });
 
 /**
  * CATEGORY SELECT MENU
  */
 ace.registerMenu({
-
     id: 'help:category',
-    
+
     async execute(interaction) {
-        
         await interaction.deferUpdate();
 
         const category = interaction.values[0];
@@ -102,24 +88,20 @@ ace.registerMenu({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
-        return renderHelpView(ctx, {category});
-
-    }
-
+        return renderHelpView(ctx, { category });
+    },
 });
 
 /**
  * SUBCATEGORY SELECT MENU
  */
 ace.registerMenu({
-
     id: 'help:subcategory',
 
     async execute(interaction) {
-
         await interaction.deferUpdate();
 
         const parts = interaction.customId.split(':');
@@ -130,24 +112,20 @@ ace.registerMenu({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
         return renderHelpView(ctx, { category, subcategory });
-
-    }
-
+    },
 });
 
 /**
  * COMMAND SELECT MENU
  */
 ace.registerMenu({
-
     id: 'help:command',
 
     async execute(interaction) {
-
         await interaction.deferUpdate();
 
         const parts = interaction.customId.split(':');
@@ -160,11 +138,9 @@ ace.registerMenu({
         const ctx = await ace.createContext({
             interaction,
             client: interaction.client as ace.BotClient,
-            args: {}
+            args: {},
         });
 
         return renderHelpView(ctx, { category, subcategory, command });
-
-    }
-
+    },
 });

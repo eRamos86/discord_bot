@@ -134,7 +134,7 @@ export async function handleQuickExpense(
     // Single account, explicit account, or default
     const targetAccount = accountId
         ? activeAccounts.find((a) => a.id === accountId)
-        : activeAccounts.find((a) => a.isDefault) ?? activeAccounts[0];
+        : (activeAccounts.find((a) => a.isDefault) ?? activeAccounts[0]);
 
     await platform.flux.expense(token, amount, description, accountId);
     const embed = expenseConfirmEmbed({

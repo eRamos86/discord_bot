@@ -43,7 +43,7 @@ async function requireDocker() {
     const code = await spawnChild(['docker', 'info'], { stdio: 'ignore' });
     if (code !== 0) {
         throw new Error(
-            'Docker is not running. Start Docker Desktop (or the Docker daemon), then run npm run dev again.'
+            'Docker is not running. Start Docker Desktop (or the Docker daemon), then run npm run dev again.',
         );
     }
 }

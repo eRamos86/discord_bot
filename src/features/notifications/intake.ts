@@ -51,14 +51,20 @@ export function parseEvent(input: unknown, source: string): PlatformEvent {
         'Invalid event message.',
     );
     requireValue(
-        Object.keys(v).every((k) => ['version', 'id', 'source', 'type', 'title', 'message', 'recipient'].includes(k)),
+        Object.keys(v).every((k) =>
+            ['version', 'id', 'source', 'type', 'title', 'message', 'recipient'].includes(k),
+        ),
         'Event contains unsupported fields. Destinations are configured in the bot.',
     );
     let recipientNovaId: string | undefined;
     if (v.recipient !== undefined) {
         const recipient = record(v.recipient);
         requireValue(
-            v.version === 1 && Object.keys(recipient).length === 1 && typeof recipient.novaUserId === 'string' && recipient.novaUserId.length > 0 && recipient.novaUserId.length <= 128,
+            v.version === 1 &&
+                Object.keys(recipient).length === 1 &&
+                typeof recipient.novaUserId === 'string' &&
+                recipient.novaUserId.length > 0 &&
+                recipient.novaUserId.length <= 128,
             'Invalid event recipient.',
         );
         recipientNovaId = recipient.novaUserId;
@@ -99,10 +105,16 @@ export async function acceptEvent(event: PlatformEvent, raw: Buffer) {
                 [event.source, event.id, event.recipientNovaId, discordId ?? '', status],
             );
             if (status === 'queued' && discordId) {
-                const id = createHash('sha256').update(`${event.source}:${event.id}:${discordId}`).digest('hex');
+                const id = createHash('sha256')
+                    .update(`${event.source}:${event.id}:${discordId}`)
+                    .digest('hex');
                 await c.query(
                     "INSERT INTO jobs(id,kind,user_id,payload,run_at) VALUES($1,'user_notification',$2,$3,now()) ON CONFLICT DO NOTHING",
-                    [id, discordId, { source: event.source, eventId: event.id, text: `${event.title}\n${event.message}` }],
+                    [
+                        id,
+                        discordId,
+                        { source: event.source, eventId: event.id, text: `${event.title}\n${event.message}` },
+                    ],
                 );
                 return { duplicate: false, deliveries: 1 };
             }

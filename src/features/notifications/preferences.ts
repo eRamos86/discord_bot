@@ -21,7 +21,8 @@ export async function setNotificationPreference(
     eventType: string,
     enabled: boolean,
 ) {
-    if (!novaId || !validPart(source) || !validPart(eventType)) throw new Error('Invalid notification preference.');
+    if (!novaId || !validPart(source) || !validPart(eventType))
+        throw new Error('Invalid notification preference.');
     await pool.query(
         `INSERT INTO user_notification_preferences(nova_id,source,event_type,enabled)
          VALUES($1,$2,$3,$4)
