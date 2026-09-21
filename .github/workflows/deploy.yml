@@ -81,7 +81,7 @@ jobs:
               echo 'MUSIC_TRACKS_JSON={}' >> .env
 
               docker compose up -d --build || {
-                echo "=== compose up failed; diagnosing ==="
+                printf '%s\n' '=== compose up failed; diagnosing ==='
                 docker compose ps -a
                 docker compose logs postgres --tail 100
                 docker compose logs migrate --tail 100
